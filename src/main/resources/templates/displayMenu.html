@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>메뉴조회</title>
+</head>
+
+{{> link}}
+<link href="/css/owner.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+<body>
+{{> header}}
+<main>
+    <div class="container">
+        <div class="section">
+            <h5>나의 메뉴 등록상황</h5>
+        </div>
+        <div class="divider"></div>
+        {{> menulist}}
+    </div>
+</main>
+</body>
+{{> footer}}
+<script type="module">
+    import {MenuInForm} from '/js/owner_reservation.js';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var counter = document.querySelectorAll('.input_counter');
+        M.CharacterCounter.init(counter);
+
+        const storeId = $('#storeId').value;
+        const menu = new MenuInForm(storeId, $('#menu-collection'),
+            {
+                callbackOnInit: () => {
+                    if ($('.loading-wrapper'))
+                        $('.loading-wrapper').remove();
+                }
+            }
+        );
+        menu.registerEvent();
+        menu.getAllMenus();
+
+    });
+
+    function createStore() {
+        if (!validateForm($('form')))
+            return;
+        let formData = new FormData();
+        serializeArray($('form')).forEach(e => formData.append(e.name, e.value));
+        const fileElem = $('input[type=file]');
+        if (fileElem.files.length == 1 && fileElem.files[0].type.match('image.*')) {
+            const file = fileElem.files[0];
+            // if (!file.type.match('image.*')) {
+            //     return;
+            // }
+            formData.append(fileElem.name, file, file.name);
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/stores', true);
+
+        xhr.onload = function (progressEvent) {
+            const status = progressEvent.target.status;
+            if (status === 200) {
+                document.location = progressEvent.target.response;
+            }
+        };
+
+        xhr.send(formData);
+    }
+
+</script>
+</html>

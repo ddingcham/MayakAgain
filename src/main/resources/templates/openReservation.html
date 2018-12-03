@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>예약등록</title>
+</head>
+{{> link}}
+<link href="/css/owner.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+<body>
+{{> header}}
+<main>
+    <div class="container">
+        <form>
+            <div class="row">
+
+                <div class="section">
+                    <h5><span id="tomorrow"></span>일의 예약 오픈 </h5>
+                </div>
+                <div class="divider"></div>
+                <div class="section" id="hourSection">
+                    <div class="wrapped-box valign-wrapper">
+                        <div class="col s4 center">
+                            <h6> 예약 마감 시간 </h6>
+                        </div>
+                        <div class="col s6 input-field ">
+                            {{#store}}
+                            <input name="timeToClose" type="text" name="timeToClose" class="flat-timepicker"
+                                   placeholder="{{timeToClose}}" data-default-value="{{timeToClose}}"
+                                   data-hour="{{hourToClose}}" data-minute="{{minuteToClose}}">
+                            {{/store}}
+                        </div>
+                        <div class="col s2"></div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+            </div>
+            <div class="row">
+                <h5>메뉴</h5>
+                <label class="error-msg opacity-hidden">메뉴를 선택해주십시오</label>
+                <ul id="open-menu-collection" class="collection" style="border: none;">
+
+                </ul>
+                <div class="col s12 center">
+                    <button class="btn waves-effect waves-light btn-large" type="button" id="loadMenuBtn">메뉴 추가
+                    </button>
+
+                    <button class="btn waves-effect waves-light btn-large" type="button" id="openReservationBtn">
+                        예약 등록
+                    </button>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <div id="menuModal" class="modal">
+        <div>
+            {{>menulist}}
+        </div>
+    </div>
+</main>
+</body>
+
+<script type="module">
+    import Ctrls from '/js/ctrl.js'
+    import {MenuInModal, OpenReservation} from '/js/owner_reservation.js';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const storeId = $('#storeId').value;
+        const openReservation = new OpenReservation(storeId, $('#open-menu-collection'),
+            {
+                callbackOnDelete: (menuId) => {
+                    menu.enableMenu(menuId);
+                }
+            });
+        openReservation.registEvent();
+        openReservation.getLastUsedMenus();
+
+        const menu = new MenuInModal(storeId, $('#menu-collection'),
+            {   //hint this binding 이 제대로 안되기 때문에 아래처럼 호출...
+                callbackOnAdd: (menus) => { openReservation.addMenu(menus) },
+
+            });
+        menu.registerEvent();
+
+        const modalElems = $('.modal');
+        const modalInstance = M.Modal.init(modalElems);
+        $('#loadMenuBtn').addEventListener('click', async (event) => {
+            if (hasClass($('.loading-wrapper'), 'off')) {
+                $('.modal').M_Modal.open();
+                return;
+            }
+            removeClass($('.loading-wrapper'), 'off');
+            //todo refactor
+            await menu.getAllMenus();
+
+            addClass($('.loading-wrapper'), 'off');
+
+            $('.modal').M_Modal.open();
+        });
+
+        //todo duplicated -- 중복 제거, 모듈로 분리
+        const defaultTime = $('.flat-timepicker').getAttribute('data-default-value');
+        // const minTime = $('.flat-timepicker').getAttribute('data-min-date');
+        flatpickr('.flat-timepicker',
+            {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'H:i',
+                time_24hr: true,
+                defaultDate: defaultTime,
+                //minDate: defaultTime,
+                minuteIncrement: '30',
+                //maxDate: '24:00',
+                disableMobile: 'true',
+            });
+
+        const today = new Date();
+        today.setDate(today.getDate() + 1);
+        const tomorrow = formatDate(today);
+        $('#tomorrow').innerHTML = tomorrow ;
+
+        const ctrls = new Ctrls($('#open-menu-collection'));
+        ctrls.registerEvent();
+
+
+
+
+    });
+
+</script>
+{{> footer}}
+</html>
