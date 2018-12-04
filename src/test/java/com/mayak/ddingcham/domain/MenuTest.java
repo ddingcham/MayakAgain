@@ -32,33 +32,6 @@ public class MenuTest {
     }
 
     @Test
-    public void testCreate_메뉴_가게_매핑_메뉴관점() {
-        Store store = Store.builder()
-                .description("DESC")
-                .imgURL("img")
-                .ownerName("주인")
-                .phoneNumber("1234512345")
-                .postCode("12345")
-                .serviceDescription("serviceDESC")
-                .storeName("storeName")
-                .address("ADDRESS")
-                .build();
-        store = storeRepository.save(store);
-        Menu menu = Menu.builder()
-                .name("NAME")
-                .price(1000)
-                .description("DESC")
-                .imageUrl("/img")
-                .build();
-        //store.addMenu(); // cascade
-        menu.setStore(store);
-        menu = menuRepository.save(menu);
-        //assertThat(store.getMenus....(menu.getId()))
-        assertThat(menu.getStore()).isEqualTo(store);
-        assertThat(menu.hasSameStore(store)).isTrue();
-    }
-
-    @Test
     public void testCreate_메뉴_가게_매핑_가게관점() {
         Store store = Store.builder()
                 .description("DESC")
@@ -80,24 +53,4 @@ public class MenuTest {
         log.debug("store after update : {}", store);
         assertThat(store.hasMenu(menu)).isTrue();
     }
-
-    @Test
-    public void testCreateMenuOutputDTO() {
-        Store store = Store.builder()
-                .description("DESC")
-                .imgURL("img")
-                .ownerName("주인")
-                .phoneNumber("1234512345")
-                .postCode("12345")
-                .serviceDescription("create menu 가게관점")
-                .storeName("storeName")
-                .address("ADDRESS")
-                .build();
-    }
-
-    @Test
-    public void 새로운_Menu_생성() {
-
-    }
-
 }
