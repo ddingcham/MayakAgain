@@ -98,7 +98,6 @@ public class AuthorizedStoreTest {
                 .price(1)
                 .imageUrl("/path")
                 .build();
-        defaultMenu = Menu.builder().store(store).name("test2").description("test2").price(2).imageUrl("/path").build();
         store.addMenu(defaultMenu);
         storeRepository.save(store);
     }

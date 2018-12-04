@@ -78,4 +78,12 @@ public class Menu {
     public boolean hasSameStore(Store store) {
         return this.store.equals(store);
     }
+
+    public boolean isSameMenu(Menu other) {
+        return isNotEmptyMenu(other) && name.equals(other.name) && price == other.price && description.equals(other.description);
+    }
+
+    private boolean isNotEmptyMenu(Menu other) {
+        return other.name != null && other.description != null;
+    }
 }

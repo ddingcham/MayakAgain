@@ -64,8 +64,9 @@ public class Store {
     private LocalDateTime timeToClose;
 
     // Todo Cascade issue 다른 옵션도 적용해야 할 수도 있음
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "store", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH})
     @Where(clause = "deleted = false")
+    @Builder.Default
     private List<Menu> menus = new ArrayList<>();
 
     // todo (현재 시각이랑 timeToClose 랑 비교) +(currentReservations 갯수?)해서 오픈상태 동기화 어떻게 해줄지
@@ -81,7 +82,8 @@ public class Store {
     }
 
     public boolean hasMenu(Menu menu) {
-        return menus.contains(menu);
+        return menus.stream()
+                .anyMatch(addedMenu -> addedMenu.isSameMenu(menu));
     }
 
     public boolean isOpen() {
