@@ -25,6 +25,8 @@ public class Store {
 
     private static final boolean OPEN = true;
     private static final boolean CLOSE = false;
+    private static final String DUPLICATE_MENU_MESSAGE = "똑같은 메뉴 정보가 이미 존재";
+    private static final String NULL_MENU_MESSAGE = "메뉴정보는 NULL이면 안됨";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,12 +75,15 @@ public class Store {
     @Transient
     private boolean isOpen = false;
 
-    public boolean addMenu(Menu menu) {
-        if (menu != null && menu.isEqualStore(this) && !hasMenu(menu)) {
-            menus.add(menu);
-            return true;
+    public void addMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException(NULL_MENU_MESSAGE);
         }
-        return false;
+        if(hasMenu(menu)) {
+            throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
+        }
+
+        menus.add(menu);
     }
 
     public boolean hasMenu(Menu menu) {

@@ -27,12 +27,15 @@ public class Menu {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    @Builder.Default
+    private String name = "메뉴";
 
     @Column(nullable = false)
-    private int price;
+    @Builder.Default
+    private int price = 0;
 
-    private String description;
+    @Builder.Default
+    private String description = "none";
 
     @Column(nullable = false, length = 400)
     private String imageUrl;
@@ -49,10 +52,6 @@ public class Menu {
     private Store store;
 
     private boolean lastUsed;
-
-    public boolean isEqualStore(Store store) {
-        return this.store.equals(store);
-    }
 
     public void deleteMenu() {
         this.deleted = true;
