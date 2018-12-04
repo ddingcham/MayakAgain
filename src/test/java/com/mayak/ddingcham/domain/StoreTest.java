@@ -43,6 +43,25 @@ public class StoreTest {
     }
 
     @Test
+    public void removeMenu() {
+        Menu removedMenu = Menu.builder()
+                .name("removedMenu")
+                .build();
+        store.addMenu(removedMenu);
+        assertThat(store.hasMenu(removedMenu)).isTrue();
+        store.removeMenu(removedMenu);
+        assertThat(store.hasMenu(removedMenu)).isFalse();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeMenu_없는메뉴() {
+        Menu removedMenu = Menu.builder()
+                .name("removedMenu")
+                .build();
+        store.removeMenu(removedMenu);
+    }
+
+    @Test
     public void store_update() {
         Store newInfo = Store.builder()
                 .description("new description")
