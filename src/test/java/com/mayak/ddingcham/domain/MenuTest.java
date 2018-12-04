@@ -28,7 +28,7 @@ public class MenuTest {
 
     @Before
     public void setUp() {
-        store = StoreTest.defaultStore();
+        store = Store.builder().build();
     }
 
     @Test
