@@ -2,6 +2,7 @@ package com.mayak.ddingcham.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,7 +46,7 @@ public class Menu {
     @JsonIgnore
     private Store store;
 
-    private boolean lastUsed; //= false;
+    private boolean lastUsed;
 
     public Menu() {
 
@@ -97,7 +98,6 @@ public class Menu {
 
     public void deleteMenu() {
         this.deleted = true;
-        return;
     }
 
     public void setUpLastUsedStatus(MaxCount maxCount) {

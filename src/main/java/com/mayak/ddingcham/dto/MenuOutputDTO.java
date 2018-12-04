@@ -1,6 +1,6 @@
 package com.mayak.ddingcham.dto;
 
-import com.mayak.ddingcham.domain.MaxCount;
+import com.mayak.ddingcham.domain.support.MaxCount;
 import com.mayak.ddingcham.domain.Menu;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;

@@ -1,6 +1,7 @@
 package com.mayak.ddingcham.domain.repository;
 
 import com.mayak.ddingcham.domain.*;
+import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;

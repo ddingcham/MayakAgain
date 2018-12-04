@@ -1,13 +1,11 @@
-package com.mayak.ddingcham.domain;
+package com.mayak.ddingcham.domain.support;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
 import javax.persistence.Embeddable;
 
 @Embeddable
-@Getter
-@NoArgsConstructor
+@Data
 @ToString
 public class MaxCount {
 
@@ -15,6 +13,7 @@ public class MaxCount {
 
     private Integer personalMaxCount;
 
+    @Builder
     public MaxCount(int maxCount, int personalMaxCount) {
         if (personalMaxCount < 1 || maxCount < personalMaxCount) {
             throw new IllegalArgumentException("illegal maxCount & personalMaxCount");

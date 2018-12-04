@@ -2,6 +2,7 @@ package com.mayak.ddingcham.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +16,8 @@ import java.time.LocalDate;
 @Getter @NoArgsConstructor @ToString
 public class Reservation implements Serializable {
 
-    private static boolean ACTIVATED = true;
-    private static boolean DEACTIVATED = false;
+    private static final boolean ACTIVATED = true;
+    private static final boolean DEACTIVATED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

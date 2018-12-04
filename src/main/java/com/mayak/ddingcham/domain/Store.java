@@ -1,5 +1,6 @@
 package com.mayak.ddingcham.domain;
 
+import com.mayak.ddingcham.domain.support.MaxCount;
 import com.mayak.ddingcham.dto.MenuOutputDTO;
 import com.mayak.ddingcham.exception.InvalidStateOnStore;
 import lombok.Builder;
@@ -16,10 +17,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Getter @NoArgsConstructor
+@Getter
+@NoArgsConstructor
 @Entity
-@ToString @Slf4j
-public class Store{
+@ToString
+@Slf4j
+public class Store {
 
     private static final boolean OPEN = true;
     private static final boolean CLOSE = false;
@@ -88,7 +91,7 @@ public class Store{
 
 
     public boolean addMenu(Menu menu) {
-        if(menu != null && menu.isEqualStore(this) && !hasMenu(menu)) {
+        if (menu != null && menu.isEqualStore(this) && !hasMenu(menu)) {
             menus.add(menu);
             return true;
         }
@@ -115,14 +118,16 @@ public class Store{
         return Objects.hash(storeName, user);
     }
 
-    public boolean isOpen(){
+    public boolean isOpen() {
         updateOpenStatus();
         return isOpen;
     }
 
-    @PostPersist @PostUpdate @PostLoad
-    public void updateOpenStatus(){
-        if(timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
+    @PostPersist
+    @PostUpdate
+    @PostLoad
+    public void updateOpenStatus() {
+        if (timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
             isOpen = CLOSE;
             return;
         }
@@ -134,7 +139,7 @@ public class Store{
         isOpen = CLOSE;
     }
 
-    public void activate(LocalDateTime timeToClose){
+    public void activate(LocalDateTime timeToClose) {
         menus.stream().forEach(menu -> menu.dropLastUsedStatus());
         this.timeToClose = timeToClose;
         isOpen = OPEN;
@@ -146,7 +151,7 @@ public class Store{
         return menuDTOs;
     }
 
-    public List<MenuOutputDTO> getUsedMenuOutputDTOList(){
+    public List<MenuOutputDTO> getUsedMenuOutputDTOList() {
         List<MenuOutputDTO> menuDTOs = new ArrayList<>();
         this.menus.stream().filter(Menu::isLastUsed).forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
         return menuDTOs;
@@ -157,9 +162,9 @@ public class Store{
     }
 
     public void updateLastUsedMenu(Menu menu, MaxCount maxCount) {
-        if(!this.isOpen)
+        if (!this.isOpen)
             throw new InvalidStateOnStore("Cannot update menu status on closed store");
-        this.menus.stream().filter(x -> x.equals(menu)).findAny().orElseThrow( () -> new InvalidStateOnStore("Cannot find menu on store"))
+        this.menus.stream().filter(x -> x.equals(menu)).findAny().orElseThrow(() -> new InvalidStateOnStore("Cannot find menu on store"))
                 .setUpLastUsedStatus(maxCount);
     }
 
