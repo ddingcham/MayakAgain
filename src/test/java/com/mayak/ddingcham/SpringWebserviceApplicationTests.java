@@ -1,8 +1,6 @@
 package com.mayak.ddingcham;
 
 import com.mayak.ddingcham.service.support.ReservationSelector;
-import com.mayak.ddingcham.test.JPATestDomain;
-import com.mayak.ddingcham.test.JPATestDomainRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SpringWebserviceApplicationTests {
 
     @Autowired
-    JPATestDomainRepository jpaTestDomainRepository;
-
-    @Autowired
     BeanFactory beanFactory;
 
     @Autowired
@@ -31,15 +26,6 @@ public class SpringWebserviceApplicationTests {
 
     @Test
     public void contextLoads() {
-    }
-
-    @Test
-    public void JPAEnvironmentLoad(){
-        JPATestDomain domain = new JPATestDomain();
-        domain.setFlag(true);
-        domain = jpaTestDomainRepository.save(domain);
-        log.debug("domain : {}", domain);
-        assertThat(domain.isFlag()).isEqualTo(jpaTestDomainRepository.findById(domain.getId()).get().isFlag());
     }
 
     @Test

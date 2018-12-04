@@ -3,17 +3,21 @@ package com.mayak.ddingcham.domain;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.mayak.ddingcham.domain.support.MaxCount;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-@Getter @NoArgsConstructor @ToString
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
+@ToString
+@Slf4j
 public class Reservation implements Serializable {
 
     private static final boolean ACTIVATED = true;
@@ -43,16 +47,6 @@ public class Reservation implements Serializable {
 
     private int availableCount;
 
-    @Builder
-    public Reservation(Menu menu, Store store, MaxCount maxCount, LocalDate openDate) {
-        this.menu = menu;
-        //hint  menu.changeTodayMenu(, );
-        this.store = store;
-        this.maxCount = maxCount;
-        this.openDate = openDate;
-        this.availableCount = maxCount.getMaxCount();
-        //hint store.addReservation(this);
-    }
     @JsonGetter("maxLimit") //todo handlebar에서 쓸 일 있으면 getter 로 ?
     public int calculateMaxLimit(){
         return this.availableCount < this.maxCount.getPersonalMaxCount() ? this.availableCount : this.maxCount.getPersonalMaxCount();

@@ -27,7 +27,12 @@ public class ApiUserAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void login_실패() {
-        User user = new User("failed_password", "fail", "fail@fail.com", "010-1111-1111");
+        User user = User.builder()
+                .name("fail")
+                .uuid("failed_password")
+                .phoneNumber("010-1111-1111")
+                .email("fail@fail.com")
+                .build();
         ResponseEntity<Void> response = template().postForEntity("/api/users/signin", user, Void.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }

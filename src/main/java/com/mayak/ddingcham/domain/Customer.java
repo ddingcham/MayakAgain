@@ -25,6 +25,7 @@ public class Customer {
         this.name = name;
         this.phoneNumber = phoneNumber;
     }
+
     @JsonGetter("phoneNumber")
     public String getFormattedPhoneNumber(){
         return NumberConverter.formatPhoneNumber(phoneNumber);

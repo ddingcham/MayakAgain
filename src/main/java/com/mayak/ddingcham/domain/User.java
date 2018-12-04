@@ -1,16 +1,19 @@
 package com.mayak.ddingcham.domain;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@NoArgsConstructor
-@Getter @Setter
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
+@ToString
+@Slf4j
 public class User {
 
     @Id
@@ -28,38 +31,4 @@ public class User {
 
     @Column(nullable = false)
     private String phoneNumber;
-
-    @Builder
-    public User(String uuid, String name, String email, String phoneNumber) {
-        this.uuid = uuid;
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(uuid, user.uuid) &&
-                Objects.equals(name, user.name) &&
-                Objects.equals(email, user.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(uuid, name, email);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", uuid='" + uuid + '\'' +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                '}';
-    }
 }

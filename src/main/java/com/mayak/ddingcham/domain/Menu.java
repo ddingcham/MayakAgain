@@ -3,18 +3,20 @@ package com.mayak.ddingcham.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mayak.ddingcham.domain.support.MaxCount;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Getter
-@Setter
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
 @ToString
+@Slf4j
 public class Menu {
 
     private static final boolean LAST_USED = true;
@@ -48,53 +50,9 @@ public class Menu {
 
     private boolean lastUsed;
 
-    public Menu() {
-
-    }
-
-    public Menu(String name, int price, String description, String imageUrl) {
-        this(name, price, description, imageUrl, null);
-    }
-
-    public Menu(String name, int price, String description, String imageUrl, Store store) {
-        this(0, name, price, description, imageUrl, store);
-    }
-
-    @Builder
-    public Menu(long id, String name, int price, String description, String imageUrl, Store store) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.store = store;
-        this.deleted = false;
-        this.maxCount = new MaxCount(2,1);
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Menu menu = (Menu) o;
-        return price == menu.price &&
-                Objects.equals(name, menu.name) &&
-                Objects.equals(description, menu.description) &&
-                Objects.equals(imageUrl, menu.imageUrl) &&
-                Objects.equals(store, menu.store);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(name, store);
-    }
-
     public boolean isEqualStore(Store store) {
         return this.store.equals(store);
     }
-
 
     public void deleteMenu() {
         this.deleted = true;

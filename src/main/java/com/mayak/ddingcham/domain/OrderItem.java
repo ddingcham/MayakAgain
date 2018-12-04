@@ -6,15 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
 @ToString
+@Slf4j
 public class OrderItem {
 
     @Id
@@ -32,13 +36,4 @@ public class OrderItem {
     private int itemCount;
 
     private int itemTotalPrice;
-
-    @Builder
-    public OrderItem(@NotNull Order order, @NotNull Reservation reservation, int itemCount) {
-        this.order = order;
-        this.reservation = reservation;
-        this.itemCount = itemCount;
-        this.itemTotalPrice = reservation.calculatePrice(itemCount);
-        order.addOrderItem(this);
-    }
 }

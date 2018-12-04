@@ -44,7 +44,12 @@ public class MenuTest {
                 .address("ADDRESS")
                 .build();
         store = storeRepository.save(store);
-        Menu menu = new Menu("NAME", 1000, "DESC", "/img");
+        Menu menu = Menu.builder()
+                .name("NAME")
+                .price(1000)
+                .description("DESC")
+                .imageUrl("/img")
+                .build();
         //store.addMenu(); // cascade
         menu.setStore(store);
         menu = menuRepository.save(menu);

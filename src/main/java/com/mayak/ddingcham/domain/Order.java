@@ -2,6 +2,7 @@ package com.mayak.ddingcham.domain;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,9 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@NoArgsConstructor
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
 @ToString
+@Slf4j
 @Table(name = "order_table")
 public class Order{
 
@@ -40,16 +45,6 @@ public class Order{
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<OrderItem> orderItems = new ArrayList<>();
-
-    @Builder
-    public Order(Customer customer, Store store, LocalDateTime pickupTime) {
-        this.customer = customer;
-        this.store = store;
-        this.createdDate = LocalDateTime.now();
-        this.pickupTime = pickupTime;
-        this.orderTotalPrice = 0;
-        this.isPickedup = false;
-    }
 
     public void addOrderItem(OrderItem orderItem) {
         this.orderItems.add(orderItem);

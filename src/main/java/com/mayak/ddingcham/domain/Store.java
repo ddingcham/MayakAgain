@@ -8,18 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
-@Builder
 @Data
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-@RequiredArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
+@EqualsAndHashCode(of = "id")
 @ToString
 @Slf4j
 public class Store {
@@ -83,22 +82,6 @@ public class Store {
 
     public boolean hasMenu(Menu menu) {
         return menus.contains(menu);
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        //todo User 추가되면 Store의 unique 제약조건 다시 생각
-        Store store = (Store) o;
-        return Objects.equals(storeName, store.storeName) &&
-                Objects.equals(user, store.user);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(storeName, user);
     }
 
     public boolean isOpen() {
