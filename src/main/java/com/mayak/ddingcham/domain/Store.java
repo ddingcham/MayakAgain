@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Entity
@@ -73,13 +74,14 @@ public class Store {
 
     // todo (현재 시각이랑 timeToClose 랑 비교) +(currentReservations 갯수?)해서 오픈상태 동기화 어떻게 해줄지
     @Transient
+    @Builder.Default
     private boolean isOpen = false;
 
     public void addMenu(Menu menu) {
         if (menu == null) {
             throw new IllegalArgumentException(NULL_MENU_MESSAGE);
         }
-        if(hasMenu(menu)) {
+        if (hasMenu(menu)) {
             throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
         }
 
@@ -88,7 +90,7 @@ public class Store {
 
     public boolean hasMenu(Menu menu) {
         return menus.stream()
-                .anyMatch(addedMenu -> addedMenu.isSameMenu(menu));
+                .anyMatch(storedMenu -> storedMenu.isSameMenu(menu));
     }
 
     public boolean isOpen() {
@@ -154,5 +156,12 @@ public class Store {
         this.description = store.description;
         this.imgURL = store.imgURL;
         return this;
+    }
+
+    public void removeMenu(Menu removedMenu) {
+        menus.remove(menus.stream()
+                .filter(storedMenu -> storedMenu.isSameMenu(removedMenu))
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new));
     }
 }

@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -45,15 +46,15 @@ public class StoreTest {
     @Test
     public void removeMenu() {
         Menu removedMenu = Menu.builder()
+                .id(1L)
                 .name("removedMenu")
                 .build();
         store.addMenu(removedMenu);
-        assertThat(store.hasMenu(removedMenu)).isTrue();
         store.removeMenu(removedMenu);
         assertThat(store.hasMenu(removedMenu)).isFalse();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NoSuchElementException.class)
     public void removeMenu_없는메뉴() {
         Menu removedMenu = Menu.builder()
                 .name("removedMenu")
