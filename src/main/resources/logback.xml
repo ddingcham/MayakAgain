@@ -9,7 +9,7 @@
 
     <logger name="support.jackson" level="DEBUG"/>
 
-    <logger name="com.aoa" level="DEBUG"/>
+    <logger name="com.mayak" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

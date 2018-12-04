@@ -6,6 +6,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.annotation.HttpConstraint;
 import java.util.Arrays;
 
 @RestController
@@ -15,7 +16,7 @@ public class DeploymentConfigurationApi {
 
     private Environment environment;
 
-    @GetMapping("/profile")
+    @GetMapping(value = "/profile")
     public String getProfile(){
         log.debug("profiles : {}", environment.getActiveProfiles());
         return Arrays.stream(environment.getActiveProfiles())
