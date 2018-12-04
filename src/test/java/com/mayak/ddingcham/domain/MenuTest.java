@@ -2,11 +2,14 @@ package com.mayak.ddingcham.domain;
 
 import com.mayak.ddingcham.dto.MenuDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -21,8 +24,15 @@ public class MenuTest {
     @Autowired
     StoreRepository storeRepository;
 
+    Store store;
+
+    @Before
+    public void setUp() {
+        store = StoreTest.defaultStore();
+    }
+
     @Test
-    public void testCreate_메뉴_가게_매핑_메뉴관점(){
+    public void testCreate_메뉴_가게_매핑_메뉴관점() {
         Store store = Store.builder()
                 .description("DESC")
                 .imgURL("img")
@@ -44,7 +54,7 @@ public class MenuTest {
     }
 
     @Test
-    public void testCreate_메뉴_가게_매핑_가게관점(){
+    public void testCreate_메뉴_가게_매핑_가게관점() {
         Store store = Store.builder()
                 .description("DESC")
                 .imgURL("img")
@@ -67,7 +77,7 @@ public class MenuTest {
     }
 
     @Test
-    public void testCreateMenuOutputDTO(){
+    public void testCreateMenuOutputDTO() {
         Store store = Store.builder()
                 .description("DESC")
                 .imgURL("img")
@@ -78,6 +88,11 @@ public class MenuTest {
                 .storeName("storeName")
                 .address("ADDRESS")
                 .build();
+    }
+
+    @Test
+    public void 새로운_Menu_생성() {
+
     }
 
 }

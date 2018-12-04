@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+
 @Slf4j
 public class StoreTest {
 
@@ -76,5 +77,29 @@ public class StoreTest {
         store.activate(timeToClose);
         store.deactivate();
         assertThat(store.isOpen()).isFalse();
+    }
+
+    public static Store defaultStore() {
+        return Store.builder()
+                .user(defaultUser())
+                .address("")
+                .addressDetail("")
+                .description("")
+                .serviceDescription("")
+                .imgURL("")
+                .timeToClose(LocalDateTime.now())
+                .phoneNumber("")
+                .storeName("")
+                .postCode("")
+                .build();
+    }
+
+    public static User defaultUser() {
+        return User.builder()
+                .email("mayak@mayak.com")
+                .name("mayakUser")
+                .phoneNumber("000-000-0000")
+                .uuid("0")
+                .build();
     }
 }

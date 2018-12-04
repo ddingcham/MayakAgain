@@ -3,23 +3,23 @@ package com.mayak.ddingcham.domain;
 import com.mayak.ddingcham.domain.support.MaxCount;
 import com.mayak.ddingcham.dto.MenuOutputDTO;
 import com.mayak.ddingcham.exception.InvalidStateOnStore;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Getter
-@NoArgsConstructor
 @Entity
+@Builder
+@Data
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor
 @ToString
 @Slf4j
 public class Store {
@@ -72,23 +72,6 @@ public class Store {
     // todo (현재 시각이랑 timeToClose 랑 비교) +(currentReservations 갯수?)해서 오픈상태 동기화 어떻게 해줄지
     @Transient
     private boolean isOpen = false;
-
-    @Builder
-    public Store(String storeName, String serviceDescription, String ownerName, String imgURL, String postCode, String address, String addressDetail, String phoneNumber, String description, LocalDateTime timeToClose, boolean isOpen, User user) {
-        this.storeName = storeName;
-        this.serviceDescription = serviceDescription;
-        this.ownerName = ownerName;
-        this.imgURL = imgURL;
-        this.postCode = postCode;
-        this.address = address;
-        this.addressDetail = addressDetail;
-        this.phoneNumber = phoneNumber;
-        this.description = description;
-        this.timeToClose = timeToClose;
-        this.isOpen = isOpen;
-        this.user = user;
-    }
-
 
     public boolean addMenu(Menu menu) {
         if (menu != null && menu.isEqualStore(this) && !hasMenu(menu)) {
