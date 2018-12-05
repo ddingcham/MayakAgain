@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -75,9 +76,11 @@ public class StoreTest {
     public void addReservation() {
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
-        Reservation reservation = store.addReservation(menuForReservation, defaultMaxCount());
-        log.debug("addedReservation : {}", reservation);
-        assertThat(reservation.isActivated()).isTrue();
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        List<Reservation> reservations = store.getActiveReservations();
+        log.debug("addedReservations : {}", reservations);
+        assertThat(reservations).allMatch(reservation -> reservation.isActivated());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -85,20 +88,23 @@ public class StoreTest {
         store = unClosedStore();
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation(menuForReservation, defaultMaxCount());
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
         Menu menuForReservation = deletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation(menuForReservation, defaultMaxCount());
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void addReservation_없는_Menu에_대해서_생성할_경우() {
         Menu menuForReservation = unDeletedMenu();
-        store.addReservation(menuForReservation, defaultMaxCount());
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
     }
 
     private Store unClosedStore() {

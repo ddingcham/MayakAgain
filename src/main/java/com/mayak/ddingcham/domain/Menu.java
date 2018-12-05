@@ -103,4 +103,11 @@ public class Menu {
         reservations.add(reservation);
         return reservation;
     }
+
+    Reservation getActiveReservation() {
+        return reservations.stream()
+                .filter(reservation->reservation.isActivated())
+                .findAny()
+                .orElse(null);
+    }
 }

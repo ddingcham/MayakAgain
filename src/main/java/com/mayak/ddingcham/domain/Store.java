@@ -1,6 +1,7 @@
 package com.mayak.ddingcham.domain;
 
 import com.mayak.ddingcham.domain.support.MaxCount;
+import com.mayak.ddingcham.domain.support.ReservationGeneratable;
 import com.mayak.ddingcham.dto.MenuOutputDTO;
 import com.mayak.ddingcham.exception.InvalidStateOnStore;
 import lombok.*;
@@ -9,10 +10,8 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -22,7 +21,7 @@ import java.util.Optional;
 @EqualsAndHashCode(of = "id")
 @ToString
 @Slf4j
-public class Store {
+public class Store implements ReservationGeneratable {
 
     private static final boolean OPEN = true;
     private static final boolean CLOSE = false;
@@ -158,12 +157,24 @@ public class Store {
                 .findAny();
     }
 
-    public Reservation addReservation(Menu menuForReservation, MaxCount maxCount) {
+    public ReservationGeneratable addReservation() {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
-        return searchMenuNotDeleted(menuForReservation)
+        return this;
+    }
+
+    public ReservationGeneratable with(Menu menuForReservation, MaxCount maxCount) {
+        searchMenuNotDeleted(menuForReservation)
                 .orElseThrow(NoSuchElementException::new)
                 .addReservation(maxCount);
+        return this;
+    }
+
+    public List<Reservation> getActiveReservations() {
+        return menus.stream()
+                .map(menu -> menu.getActiveReservation())
+                .filter(reservation -> reservation != null)
+                .collect(Collectors.toList());
     }
 }
