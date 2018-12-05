@@ -72,6 +72,42 @@ public class StoreTest {
     }
 
     @Test
+    public void addReservation() {
+
+    }
+
+    @Test
+    public void addReservation_Store가_닫힌상태인_경우() {
+
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
+
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void addReservation_없는_Menu에_대해서_생성할_경우() {
+
+    }
+
+    @Test
+    public void Store가_닫힌_상태가_될_때_활성화_상태의_Reservation들은_비활성화_상태로() {
+
+    }
+
+    @Test
+    public void Reservation이_비활성화될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
+
+    }
+
+    @Test
+    public void 새로운_Reservation이_등록될_때_기존에_마지막_사용되었던_Menu의_상태를_업데이트() {
+
+    }
+
+
+    @Test
     public void store_update() {
         log.debug("store : {}", store);
         Store newInfo = Store.builder()
@@ -92,13 +128,5 @@ public class StoreTest {
         softly.assertThat(store.getServiceDescription()).isEqualTo(newInfo.getServiceDescription());
         softly.assertThat(store.getAddress()).isEqualTo(newInfo.getAddress());
         softly.assertAll();
-    }
-
-    @Test
-    public void store_deactivate() {
-        LocalDateTime timeToClose = LocalDateTime.now();
-        store.activate(timeToClose);
-        store.deactivate();
-        assertThat(store.isOpen()).isFalse();
     }
 }
