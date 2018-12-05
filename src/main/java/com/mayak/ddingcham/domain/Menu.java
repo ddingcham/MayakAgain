@@ -18,8 +18,10 @@ import javax.persistence.*;
 @Slf4j
 public class Menu {
 
-    private static final boolean LAST_USED = true;
-    private static final boolean NOT_LAST_USED = false;
+    static final boolean DELETED = true;
+    static final boolean UN_DELETED = false;
+    static final boolean LAST_USED = true;
+    static final boolean NOT_LAST_USED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +55,7 @@ public class Menu {
     private boolean lastUsed;
 
     public void deleteMenu() {
-        this.deleted = true;
+        this.deleted = DELETED;
     }
 
     public void setUpLastUsedStatus(MaxCount maxCount) {

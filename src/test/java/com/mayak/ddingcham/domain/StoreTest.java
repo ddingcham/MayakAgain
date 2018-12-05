@@ -1,5 +1,6 @@
 package com.mayak.ddingcham.domain;
 
+import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
@@ -19,7 +20,6 @@ public class StoreTest {
     @Before
     public void setUp() {
         store = Store.builder().build();
-        store.addMenu(Menu.builder().build());
     }
 
 
@@ -73,22 +73,71 @@ public class StoreTest {
 
     @Test
     public void addReservation() {
-
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        Reservation reservation = store.addReservation(menuForReservation, defaultMaxCount());
+        log.debug("addedReservation : {}", reservation);
+        assertThat(reservation.isActivated()).isTrue();
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void addReservation_Store가_닫힌상태인_경우() {
-
+        store = closedStore();
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation(menuForReservation, defaultMaxCount());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
-
+        Menu menuForReservation = deletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation(menuForReservation, defaultMaxCount());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void addReservation_없는_Menu에_대해서_생성할_경우() {
+        Menu menuForReservation = unDeletedMenu();
+        store.addReservation(menuForReservation, defaultMaxCount());
+    }
 
+    private Store closedStore() {
+        return Store.builder()
+                .timeToClose(LocalDateTime.MIN)
+                .build();
+    }
+
+    private Menu deletedMenu() {
+        return Menu.builder()
+                .name("deletedMenu")
+                .deleted(Menu.DELETED)
+                .build();
+    }
+
+    private Menu unDeletedMenu() {
+        return Menu.builder()
+                .name("unDeletedMenu")
+                .build();
+    }
+
+    private Menu lastUsedMenu() {
+        return Menu.builder()
+                .name("lastUsedMenu")
+                .lastUsed(Menu.LAST_USED)
+                .build();
+    }
+
+    private Menu notLastUsedMenu() {
+        return Menu.builder()
+                .name("notLastUsedMenu")
+                .build();
+    }
+
+    private MaxCount defaultMaxCount(){
+        return MaxCount.builder()
+                .maxCount(1)
+                .personalMaxCount(1)
+                .build();
     }
 
     @Test
