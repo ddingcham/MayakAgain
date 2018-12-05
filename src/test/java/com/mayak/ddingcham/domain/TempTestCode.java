@@ -96,7 +96,7 @@ public class TempTestCode {
                 .isEmpty();
         softly.assertThat(reservations
                 .stream()
-                .filter(reservation -> !store.hasMenu(reservation.getMenu())))
+                .filter(reservation -> !store.hasMenuNotDeleted(reservation.getMenu())))
                 .as("Store에 있는 Menu 중에 다 넣어줬는지")
                 .isEmpty();
         softly.assertAll();

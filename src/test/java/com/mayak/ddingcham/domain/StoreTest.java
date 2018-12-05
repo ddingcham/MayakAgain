@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -31,7 +30,7 @@ public class StoreTest {
                 .build();
         store.addMenu(addedMenu);
 
-        assertThat(store.hasMenu(addedMenu)).isTrue();
+        assertThat(store.hasMenuNotDeleted(addedMenu)).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -51,7 +50,7 @@ public class StoreTest {
                 .build();
         store.addMenu(removedMenu);
         store.removeMenu(removedMenu);
-        assertThat(store.hasMenu(removedMenu)).isFalse();
+        assertThat(store.hasMenuNotDeleted(removedMenu)).isFalse();
     }
 
     @Test(expected = NoSuchElementException.class)
@@ -87,8 +86,6 @@ public class StoreTest {
 
     @Test
     public void store_deactivate() {
-        //When
-        List<Reservation> reservations = null;
         LocalDateTime timeToClose = LocalDateTime.now();
         store.activate(timeToClose);
         store.deactivate();

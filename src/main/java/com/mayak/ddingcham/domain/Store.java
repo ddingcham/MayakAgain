@@ -80,16 +80,16 @@ public class Store {
         if (menu == null) {
             throw new IllegalArgumentException(NULL_MENU_MESSAGE);
         }
-        if (hasMenu(menu)) {
+        if (hasMenuNotDeleted(menu)) {
             throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
         }
 
         menus.add(menu);
     }
 
-    public boolean hasMenu(Menu menu) {
+    public boolean hasMenuNotDeleted(Menu menu) {
         return menus.stream()
-                .anyMatch(storedMenu -> storedMenu.isSameMenu(menu));
+                .anyMatch(storedMenu -> storedMenu.isSameMenu(menu) && !storedMenu.isDeleted());
     }
 
     public boolean isOpen() {
@@ -154,9 +154,10 @@ public class Store {
     }
 
     public void removeMenu(Menu removedMenu) {
-        menus.remove(menus.stream()
+        menus.stream()
                 .filter(storedMenu -> storedMenu.isSameMenu(removedMenu))
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new));
+                .orElseThrow(NoSuchElementException::new)
+                .deleteMenu();
     }
 }

@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -51,6 +49,6 @@ public class MenuTest {
         log.debug("store after add menu : {}", store);
         store = storeRepository.save(store);
         log.debug("store after update : {}", store);
-        assertThat(store.hasMenu(menu)).isTrue();
+        assertThat(store.hasMenuNotDeleted(menu)).isTrue();
     }
 }
