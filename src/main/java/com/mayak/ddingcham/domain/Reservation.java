@@ -20,8 +20,8 @@ import java.time.LocalDate;
 @Slf4j
 public class Reservation implements Serializable {
 
-    private static final boolean ACTIVATED = true;
-    private static final boolean DEACTIVATED = false;
+    static final boolean ACTIVATED = true;
+    static final boolean DEACTIVATED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

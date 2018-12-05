@@ -7,6 +7,9 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -54,6 +57,10 @@ public class Menu {
 
     private boolean lastUsed;
 
+    @OneToMany
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
+
     public void deleteMenu() {
         this.deleted = DELETED;
     }
@@ -85,5 +92,15 @@ public class Menu {
 
     private boolean isNotEmptyMenu(Menu other) {
         return other.name != null && other.description != null;
+    }
+
+    Reservation addReservation(MaxCount maxCount) {
+        Reservation reservation = Reservation.builder()
+                .openDate(LocalDate.now())
+                .activated(Reservation.ACTIVATED)
+                .maxCount(maxCount)
+                .build();
+        reservations.add(reservation);
+        return reservation;
     }
 }

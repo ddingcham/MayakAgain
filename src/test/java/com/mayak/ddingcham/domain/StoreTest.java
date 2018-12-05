@@ -81,8 +81,8 @@ public class StoreTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void addReservation_Store가_닫힌상태인_경우() {
-        store = closedStore();
+    public void addReservation_Store가_열린_상태인_경우() {
+        store = unClosedStore();
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
         store.addReservation(menuForReservation, defaultMaxCount());
@@ -101,9 +101,9 @@ public class StoreTest {
         store.addReservation(menuForReservation, defaultMaxCount());
     }
 
-    private Store closedStore() {
+    private Store unClosedStore() {
         return Store.builder()
-                .timeToClose(LocalDateTime.MIN)
+                .timeToClose(LocalDateTime.MAX)
                 .build();
     }
 

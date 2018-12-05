@@ -28,6 +28,7 @@ public class Store {
     private static final boolean CLOSE = false;
     private static final String DUPLICATE_MENU_MESSAGE = "똑같은 메뉴 정보가 이미 존재";
     private static final String NULL_MENU_MESSAGE = "메뉴정보는 NULL이면 안됨";
+    private static final String INVALID_STATE_TO_ADD_RESERVATION = "가게가 닫힌 상태일 때만 예약 추가가 가능합니다.";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,36 +73,27 @@ public class Store {
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
 
-    // todo (현재 시각이랑 timeToClose 랑 비교) +(currentReservations 갯수?)해서 오픈상태 동기화 어떻게 해줄지
-    @Transient
-    @Builder.Default
-    private boolean isOpen = false;
-
     public boolean isOpen() {
-        updateOpenStatus();
-        return isOpen;
+        return updateOpenStatus();
     }
 
     @PostPersist
     @PostUpdate
     @PostLoad
-    public void updateOpenStatus() {
+    public boolean updateOpenStatus() {
         if (timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
-            isOpen = CLOSE;
-            return;
+            return CLOSE;
         }
-        isOpen = OPEN;
+        return OPEN;
     }
 
     public void deactivate() {
         timeToClose = null;
-        isOpen = CLOSE;
     }
 
     public void activate(LocalDateTime timeToClose) {
         menus.stream().forEach(menu -> menu.dropLastUsedStatus());
         this.timeToClose = timeToClose;
-        isOpen = OPEN;
     }
 
     public List<MenuOutputDTO> getMenuOutputDTOList() {
@@ -117,7 +109,7 @@ public class Store {
     }
 
     public void updateLastUsedMenu(Menu menu, MaxCount maxCount) {
-        if (!this.isOpen)
+        if (isOpen() == CLOSE)
             throw new InvalidStateOnStore("Cannot update menu status on closed store");
         this.menus.stream().filter(x -> x.equals(menu)).findAny().orElseThrow(() -> new InvalidStateOnStore("Cannot find menu on store"))
                 .setUpLastUsedStatus(maxCount);
@@ -150,19 +142,28 @@ public class Store {
     }
 
     public void removeMenu(Menu removedMenu) {
-        removableMenu(removedMenu)
+        searchMenuNotDeleted(removedMenu)
                 .orElseThrow(NoSuchElementException::new)
                 .deleteMenu();
     }
 
     public boolean hasMenuNotDeleted(Menu menu) {
-        return removableMenu(menu)
+        return searchMenuNotDeleted(menu)
                 .isPresent();
     }
 
-    private Optional<Menu> removableMenu(Menu removedMenu) {
+    private Optional<Menu> searchMenuNotDeleted(Menu removedMenu) {
         return menus.stream()
-                .filter(storedMenu->storedMenu.isSameMenu(removedMenu) && !storedMenu.isDeleted())
+                .filter(storedMenu -> storedMenu.isSameMenu(removedMenu) && !storedMenu.isDeleted())
                 .findAny();
+    }
+
+    public Reservation addReservation(Menu menuForReservation, MaxCount maxCount) {
+        if (isOpen() == OPEN) {
+            throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
+        }
+        return searchMenuNotDeleted(menuForReservation)
+                .orElseThrow(NoSuchElementException::new)
+                .addReservation(maxCount);
     }
 }
