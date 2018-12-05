@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -51,13 +50,13 @@ public class Store {
     @Column(nullable = false, length = 100)
     private String address;
 
-    @Column(nullable = true, length = 40)
+    @Column(length = 40)
     private String addressDetail;
 
     @Column(nullable = false, length = 11)
     private String phoneNumber;
 
-    @Column(nullable = true, length = 600)
+    @Column(length = 600)
     private String description;
 
     @OneToOne
@@ -130,10 +129,6 @@ public class Store {
         List<MenuOutputDTO> menuDTOs = new ArrayList<>();
         this.menus.stream().filter(Menu::isLastUsed).forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
         return menuDTOs;
-    }
-
-    public List<Menu> getActiveMenus() {
-        return this.menus.stream().filter(Menu::isLastUsed).collect(Collectors.toList());
     }
 
     public void updateLastUsedMenu(Menu menu, MaxCount maxCount) {
