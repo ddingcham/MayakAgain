@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Entity
 @Data
@@ -76,22 +77,6 @@ public class Store {
     @Builder.Default
     private boolean isOpen = false;
 
-    public void addMenu(Menu menu) {
-        if (menu == null) {
-            throw new IllegalArgumentException(NULL_MENU_MESSAGE);
-        }
-        if (hasMenuNotDeleted(menu)) {
-            throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
-        }
-
-        menus.add(menu);
-    }
-
-    public boolean hasMenuNotDeleted(Menu menu) {
-        return menus.stream()
-                .anyMatch(storedMenu -> storedMenu.isSameMenu(menu) && !storedMenu.isDeleted());
-    }
-
     public boolean isOpen() {
         updateOpenStatus();
         return isOpen;
@@ -153,11 +138,31 @@ public class Store {
         return this;
     }
 
+    public void addMenu(Menu menu) {
+        if (menu == null) {
+            throw new IllegalArgumentException(NULL_MENU_MESSAGE);
+        }
+        if (hasMenuNotDeleted(menu)) {
+            throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
+        }
+
+        menus.add(menu);
+    }
+
     public void removeMenu(Menu removedMenu) {
-        menus.stream()
-                .filter(storedMenu -> storedMenu.isSameMenu(removedMenu))
-                .findFirst()
+        removableMenu(removedMenu)
                 .orElseThrow(NoSuchElementException::new)
                 .deleteMenu();
+    }
+
+    public boolean hasMenuNotDeleted(Menu menu) {
+        return removableMenu(menu)
+                .isPresent();
+    }
+
+    private Optional<Menu> removableMenu(Menu removedMenu) {
+        return menus.stream()
+                .filter(storedMenu->storedMenu.isSameMenu(removedMenu) && !storedMenu.isDeleted())
+                .findAny();
     }
 }

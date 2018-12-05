@@ -61,8 +61,19 @@ public class StoreTest {
         store.removeMenu(removedMenu);
     }
 
+    @Test(expected = NoSuchElementException.class)
+    public void removeMenu_삭제된메뉴_재삭제() {
+        Menu removedMenu = Menu.builder()
+                .name("removedMenu")
+                .build();
+        store.addMenu(removedMenu);
+        store.removeMenu(removedMenu);
+        store.removeMenu(removedMenu);
+    }
+
     @Test
     public void store_update() {
+        log.debug("store : {}", store);
         Store newInfo = Store.builder()
                 .description("new description")
                 .imgURL("newimg")
@@ -72,8 +83,7 @@ public class StoreTest {
                 .address("new ADDRESS")
                 .build();
         store.updateStore(newInfo);
-        log.debug("store : {}", store);
-        log.debug("newInfo : {}", newInfo);
+        log.debug("updated store : {}", store);
 
         softly.assertThat(store.getDescription()).as("메뉴변경").isEqualTo(newInfo.getDescription());
         softly.assertThat(store.getImgURL()).isEqualTo(newInfo.getImgURL());
