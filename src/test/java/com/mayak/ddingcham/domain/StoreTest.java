@@ -168,13 +168,11 @@ public class StoreTest {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void Reservation이_비활성화될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
+    public void 새로운_Reservation이_등록될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
         Menu menuForReservation = notLastUsedMenu();
         store.addMenu(menuForReservation);
         store.addReservation()
                 .with(menuForReservation, defaultMaxCount());
-        assertThat(store.getLastUsedMenus()).doesNotContain(menuForReservation);
-        store.close();
         assertThat(store.getLastUsedMenus()).contains(menuForReservation);
     }
 
