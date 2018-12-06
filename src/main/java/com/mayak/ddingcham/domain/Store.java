@@ -1,7 +1,6 @@
 package com.mayak.ddingcham.domain;
 
 import com.mayak.ddingcham.domain.support.MaxCount;
-import com.mayak.ddingcham.domain.support.ReservationGeneratable;
 import com.mayak.ddingcham.dto.MenuOutputDTO;
 import com.mayak.ddingcham.exception.InvalidStateOnStore;
 import lombok.*;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(of = "id")
 @ToString
 @Slf4j
-public class Store implements ReservationGeneratable {
+public class Store {
 
     private static final boolean OPEN = true;
     private static final boolean CLOSE = false;
@@ -157,21 +156,14 @@ public class Store implements ReservationGeneratable {
                 .findAny();
     }
 
-    public ReservationGeneratable addReservation() {
+    public ReservationRegister addReservation() {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
         menus.stream()
                 .filter(menu -> menu.isLastUsed())
                 .forEach(menu -> menu.dropLastUsedStatus());
-        return this;
-    }
-
-    public ReservationGeneratable with(Menu menuForReservation, MaxCount maxCount) {
-        searchMenuNotDeleted(menuForReservation)
-                .orElseThrow(NoSuchElementException::new)
-                .addReservation(maxCount);
-        return this;
+        return new ReservationRegister();
     }
 
     public List<Reservation> getActiveReservations() {
@@ -192,5 +184,17 @@ public class Store implements ReservationGeneratable {
         return menus.stream()
                 .filter(menu -> menu.isLastUsed())
                 .collect(Collectors.toList());
+    }
+
+    class ReservationRegister {
+        private ReservationRegister() {
+        }
+
+        public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
+            searchMenuNotDeleted(menuForReservation)
+                    .orElseThrow(NoSuchElementException::new)
+                    .addReservation(maxCount);
+            return this;
+        }
     }
 }

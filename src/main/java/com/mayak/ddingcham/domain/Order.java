@@ -44,6 +44,7 @@ public class Order{
     private Boolean isPickedup;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public void addOrderItem(OrderItem orderItem) {
