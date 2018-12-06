@@ -7,7 +7,6 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -18,10 +17,10 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = "id")
 @ToString
 @Slf4j
-public class Reservation implements Serializable {
+public class Reservation {
 
-    static final boolean ACTIVATED = true;
-    static final boolean DEACTIVATED = false;
+    static final boolean RESERVATION_ACTIVATED = true;
+    static final boolean RESERVATION_DEACTIVATED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,20 +38,20 @@ public class Reservation implements Serializable {
             @AttributeOverride(name = "maxCount", column = @Column(nullable = false)),
             @AttributeOverride(name = "personalMaxCount", column = @Column(nullable = false))
     })
-    @JsonUnwrapped //todo DTO 분리?
+    @JsonUnwrapped
     private MaxCount maxCount;
 
     private LocalDate openDate;
-    //todo menu deleted 상태
 
     private int availableCount;
 
     private boolean activated;
 
-    @JsonGetter("maxLimit") //todo handlebar에서 쓸 일 있으면 getter 로 ?
-    public int calculateMaxLimit(){
+    @JsonGetter("maxLimit")
+    public int calculateMaxLimit() {
         return this.availableCount < this.maxCount.getPersonalMaxCount() ? this.availableCount : this.maxCount.getPersonalMaxCount();
     }
+
     public void regist() {
         this.store.updateLastUsedMenu(menu, maxCount);
     }
@@ -66,7 +65,8 @@ public class Reservation implements Serializable {
     }
 
     public void checkPossiblePurchase(int itemCount) {
-        if(this.availableCount < itemCount)
-            throw new RuntimeException("Cannot buy");
+        if (this.availableCount < itemCount) {
+            throw new IllegalStateException("Cannot buy");
+        }
     }
 }

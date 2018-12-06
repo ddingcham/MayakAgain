@@ -31,7 +31,6 @@ public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    //todo length 등 다른 조건들
     @Column(nullable = false, length = 40)
     private String storeName;
 
@@ -62,10 +61,8 @@ public class Store {
     @OneToOne
     private User user;
 
-    // Todo 제약사항 추가
     private LocalDateTime timeToClose;
 
-    // Todo Cascade issue 다른 옵션도 적용해야 할 수도 있음
     @OneToMany(mappedBy = "store", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH})
     @Where(clause = "deleted = false")
     @Builder.Default
@@ -78,8 +75,10 @@ public class Store {
     @PostPersist
     @PostUpdate
     @PostLoad
+    @SuppressWarnings("deprecation")
     public boolean updateOpenStatus() {
         if (timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
+            close();
             return CLOSE;
         }
         return OPEN;
@@ -90,7 +89,7 @@ public class Store {
     }
 
     public void activate(LocalDateTime timeToClose) {
-        menus.stream().forEach(menu -> menu.dropLastUsedStatus());
+        menus.stream().forEach(Menu::dropLastUsedStatus);
         this.timeToClose = timeToClose;
     }
 
@@ -161,28 +160,31 @@ public class Store {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
         menus.stream()
-                .filter(menu -> menu.isLastUsed())
-                .forEach(menu -> menu.dropLastUsedStatus());
+                .filter(Menu::isLastUsed)
+                .forEach(Menu::dropLastUsedStatus);
         return new ReservationRegister();
     }
 
     public List<Reservation> getActiveReservations() {
         return menus.stream()
-                .map(menu -> menu.getActiveReservation())
-                .filter(reservation -> reservation != null)
+                .map(Menu::getActiveReservation)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
+    /**
+      * @deprecated (테스트 상황을 조성하기 위해 만듬 -> test double로 대체 예정)
+      */
     @Deprecated
     void close() {
         timeToClose = LocalDateTime.now();
         getActiveReservations()
-                .forEach(reservation -> reservation.setActivated(Reservation.DEACTIVATED));
+                .forEach(reservation -> reservation.setActivated(Reservation.RESERVATION_DEACTIVATED));
     }
 
     public List<Menu> getLastUsedMenus() {
         return menus.stream()
-                .filter(menu -> menu.isLastUsed())
+                .filter(Menu::isLastUsed)
                 .collect(Collectors.toList());
     }
 

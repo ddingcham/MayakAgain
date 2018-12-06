@@ -21,10 +21,10 @@ import java.util.List;
 @Slf4j
 public class Menu {
 
-    static final boolean DELETED = true;
-    static final boolean UN_DELETED = false;
-    static final boolean LAST_USED = true;
-    static final boolean NOT_LAST_USED = false;
+    static final boolean MENU_DELETED = true;
+    static final boolean MENU_UN_DELETED = false;
+    static final boolean MENU_LAST_USED = true;
+    static final boolean MENU_NOT_LAST_USED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,16 +62,16 @@ public class Menu {
     private List<Reservation> reservations = new ArrayList<>();
 
     public void deleteMenu() {
-        this.deleted = DELETED;
+        this.deleted = MENU_DELETED;
     }
 
     public void setUpLastUsedStatus(MaxCount maxCount) {
         this.maxCount = maxCount;
-        this.lastUsed = LAST_USED;
+        this.lastUsed = MENU_LAST_USED;
     }
 
     public void dropLastUsedStatus() {
-        lastUsed = NOT_LAST_USED;
+        lastUsed = MENU_NOT_LAST_USED;
     }
 
     public boolean isLastUsed() {
@@ -97,17 +97,17 @@ public class Menu {
     Reservation addReservation(MaxCount maxCount) {
         Reservation reservation = Reservation.builder()
                 .openDate(LocalDate.now())
-                .activated(Reservation.ACTIVATED)
+                .activated(Reservation.RESERVATION_ACTIVATED)
                 .maxCount(maxCount)
                 .build();
         reservations.add(reservation);
-        lastUsed = LAST_USED;
+        lastUsed = MENU_LAST_USED;
         return reservation;
     }
 
     Reservation getActiveReservation() {
         return reservations.stream()
-                .filter(reservation->reservation.isActivated())
+                .filter(Reservation::isActivated)
                 .findAny()
                 .orElse(null);
     }

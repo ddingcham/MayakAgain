@@ -81,7 +81,7 @@ public class StoreTest {
         List<Reservation> reservations = store.getActiveReservations();
         log.debug("addedReservations : {}", reservations);
         assertThat(reservations)
-                .allMatch(reservation -> reservation.isActivated());
+                .allMatch(Reservation::isActivated);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -121,7 +121,7 @@ public class StoreTest {
     private Menu deletedMenu() {
         return Menu.builder()
                 .name("deletedMenu")
-                .deleted(Menu.DELETED)
+                .deleted(Menu.MENU_DELETED)
                 .build();
     }
 
@@ -134,15 +134,15 @@ public class StoreTest {
     private Menu lastUsedMenu() {
         return Menu.builder()
                 .name("lastUsedMenu")
-                .deleted(Menu.UN_DELETED)
-                .lastUsed(Menu.LAST_USED)
+                .deleted(Menu.MENU_UN_DELETED)
+                .lastUsed(Menu.MENU_LAST_USED)
                 .build();
     }
 
     private Menu notLastUsedMenu() {
         return Menu.builder()
                 .name("notLastUsedMenu")
-                .deleted(Menu.UN_DELETED)
+                .deleted(Menu.MENU_UN_DELETED)
                 .build();
     }
 
@@ -165,11 +165,10 @@ public class StoreTest {
         store.close();
         log.debug("after close addedReservations : {}", reservations);
         assertThat(reservations)
-                .allMatch(reservation -> !reservation.isActivated());
+                .noneMatch(Reservation::isActivated);
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void 새로운_Reservation이_등록될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
         Menu menuForReservation = notLastUsedMenu();
         store.addMenu(menuForReservation);
