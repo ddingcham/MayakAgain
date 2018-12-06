@@ -184,4 +184,10 @@ public class Store implements ReservationGeneratable {
         getActiveReservations()
                 .forEach(reservation -> reservation.setActivated(Reservation.DEACTIVATED));
     }
+
+    public List<Menu> getLastUsedMenus() {
+        return menus.stream()
+                .filter(menu -> menu.isLastUsed())
+                .collect(Collectors.toList());
+    }
 }
