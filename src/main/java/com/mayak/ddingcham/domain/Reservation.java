@@ -20,8 +20,8 @@ import java.time.LocalDate;
 @Slf4j
 public class Reservation implements Serializable {
 
-    private static final boolean ACTIVATED = true;
-    private static final boolean DEACTIVATED = false;
+    static final boolean ACTIVATED = true;
+    static final boolean DEACTIVATED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +46,8 @@ public class Reservation implements Serializable {
     //todo menu deleted 상태
 
     private int availableCount;
+
+    private boolean activated;
 
     @JsonGetter("maxLimit") //todo handlebar에서 쓸 일 있으면 getter 로 ?
     public int calculateMaxLimit(){

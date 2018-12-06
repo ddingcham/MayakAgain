@@ -1,5 +1,6 @@
 package com.mayak.ddingcham.domain;
 
+import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
@@ -20,7 +21,6 @@ public class StoreTest {
     @Before
     public void setUp() {
         store = Store.builder().build();
-        store.addMenu(Menu.builder().build());
     }
 
 
@@ -31,7 +31,7 @@ public class StoreTest {
                 .build();
         store.addMenu(addedMenu);
 
-        assertThat(store.hasMenu(addedMenu)).isTrue();
+        assertThat(store.hasMenuNotDeleted(addedMenu)).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -51,7 +51,7 @@ public class StoreTest {
                 .build();
         store.addMenu(removedMenu);
         store.removeMenu(removedMenu);
-        assertThat(store.hasMenu(removedMenu)).isFalse();
+        assertThat(store.hasMenuNotDeleted(removedMenu)).isFalse();
     }
 
     @Test(expected = NoSuchElementException.class)
@@ -62,8 +62,141 @@ public class StoreTest {
         store.removeMenu(removedMenu);
     }
 
+    @Test(expected = NoSuchElementException.class)
+    public void removeMenu_삭제된메뉴_재삭제() {
+        Menu removedMenu = Menu.builder()
+                .name("removedMenu")
+                .build();
+        store.addMenu(removedMenu);
+        store.removeMenu(removedMenu);
+        store.removeMenu(removedMenu);
+    }
+
+    @Test
+    public void addReservation() {
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        List<Reservation> reservations = store.getActiveReservations();
+        log.debug("addedReservations : {}", reservations);
+        assertThat(reservations)
+                .allMatch(reservation -> reservation.isActivated());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void addReservation_Store가_열린_상태인_경우() {
+        store = unClosedStore();
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+    }
+
+    public void test(){
+        store = unClosedStore();
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
+        Menu menuForReservation = deletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void addReservation_없는_Menu에_대해서_생성할_경우() {
+        Menu menuForReservation = unDeletedMenu();
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+    }
+
+    private Store unClosedStore() {
+        return Store.builder()
+                .timeToClose(LocalDateTime.MAX)
+                .build();
+    }
+
+    private Menu deletedMenu() {
+        return Menu.builder()
+                .name("deletedMenu")
+                .deleted(Menu.DELETED)
+                .build();
+    }
+
+    private Menu unDeletedMenu() {
+        return Menu.builder()
+                .name("unDeletedMenu")
+                .build();
+    }
+
+    private Menu lastUsedMenu() {
+        return Menu.builder()
+                .name("lastUsedMenu")
+                .deleted(Menu.UN_DELETED)
+                .lastUsed(Menu.LAST_USED)
+                .build();
+    }
+
+    private Menu notLastUsedMenu() {
+        return Menu.builder()
+                .name("notLastUsedMenu")
+                .deleted(Menu.UN_DELETED)
+                .build();
+    }
+
+    private MaxCount defaultMaxCount(){
+        return MaxCount.builder()
+                .maxCount(1)
+                .personalMaxCount(1)
+                .build();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void Store가_닫힌_상태가_될_때_활성화_상태의_Reservation들은_비활성화_상태로() {
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        List<Reservation> reservations = store.getActiveReservations();
+        log.debug("before close addedReservations : {}", reservations);
+        store.close();
+        log.debug("after close addedReservations : {}", reservations);
+        assertThat(reservations)
+                .allMatch(reservation -> !reservation.isActivated());
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void 새로운_Reservation이_등록될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
+        Menu menuForReservation = notLastUsedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        assertThat(store.getLastUsedMenus())
+                .anyMatch(menu -> menu.isSameMenu(menuForReservation));
+    }
+
+    @Test
+    public void 새로운_Reservation이_등록될_때_기존에_마지막_사용되었던_Menu의_상태를_업데이트() {
+        Menu lastUsedMenu = lastUsedMenu();
+        Menu menuForReservation = notLastUsedMenu();
+        store.addMenu(lastUsedMenu);
+        store.addMenu(menuForReservation);
+        assertThat(store.getLastUsedMenus())
+                .anyMatch(menu -> menu.isSameMenu(lastUsedMenu));
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        assertThat(store.getLastUsedMenus())
+                .noneMatch(menu -> menu.isSameMenu(lastUsedMenu));
+    }
+
+
     @Test
     public void store_update() {
+        log.debug("store : {}", store);
         Store newInfo = Store.builder()
                 .description("new description")
                 .imgURL("newimg")
@@ -73,8 +206,7 @@ public class StoreTest {
                 .address("new ADDRESS")
                 .build();
         store.updateStore(newInfo);
-        log.debug("store : {}", store);
-        log.debug("newInfo : {}", newInfo);
+        log.debug("updated store : {}", store);
 
         softly.assertThat(store.getDescription()).as("메뉴변경").isEqualTo(newInfo.getDescription());
         softly.assertThat(store.getImgURL()).isEqualTo(newInfo.getImgURL());
@@ -83,15 +215,5 @@ public class StoreTest {
         softly.assertThat(store.getServiceDescription()).isEqualTo(newInfo.getServiceDescription());
         softly.assertThat(store.getAddress()).isEqualTo(newInfo.getAddress());
         softly.assertAll();
-    }
-
-    @Test
-    public void store_deactivate() {
-        //When
-        List<Reservation> reservations = null;
-        LocalDateTime timeToClose = LocalDateTime.now();
-        store.activate(timeToClose);
-        store.deactivate();
-        assertThat(store.isOpen()).isFalse();
     }
 }

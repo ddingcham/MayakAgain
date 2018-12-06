@@ -7,7 +7,9 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -19,8 +21,10 @@ import java.util.Objects;
 @Slf4j
 public class Menu {
 
-    private static final boolean LAST_USED = true;
-    private static final boolean NOT_LAST_USED = false;
+    static final boolean DELETED = true;
+    static final boolean UN_DELETED = false;
+    static final boolean LAST_USED = true;
+    static final boolean NOT_LAST_USED = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,8 +57,12 @@ public class Menu {
 
     private boolean lastUsed;
 
+    @OneToMany
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
+
     public void deleteMenu() {
-        this.deleted = true;
+        this.deleted = DELETED;
     }
 
     public void setUpLastUsedStatus(MaxCount maxCount) {
@@ -84,5 +92,23 @@ public class Menu {
 
     private boolean isNotEmptyMenu(Menu other) {
         return other.name != null && other.description != null;
+    }
+
+    Reservation addReservation(MaxCount maxCount) {
+        Reservation reservation = Reservation.builder()
+                .openDate(LocalDate.now())
+                .activated(Reservation.ACTIVATED)
+                .maxCount(maxCount)
+                .build();
+        reservations.add(reservation);
+        lastUsed = LAST_USED;
+        return reservation;
+    }
+
+    Reservation getActiveReservation() {
+        return reservations.stream()
+                .filter(reservation->reservation.isActivated())
+                .findAny()
+                .orElse(null);
     }
 }
