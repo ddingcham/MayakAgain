@@ -161,6 +161,9 @@ public class Store implements ReservationGeneratable {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
+        menus.stream()
+                .filter(menu -> menu.isLastUsed())
+                .forEach(menu -> menu.dropLastUsedStatus());
         return this;
     }
 

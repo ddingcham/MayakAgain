@@ -80,7 +80,8 @@ public class StoreTest {
                 .with(menuForReservation, defaultMaxCount());
         List<Reservation> reservations = store.getActiveReservations();
         log.debug("addedReservations : {}", reservations);
-        assertThat(reservations).allMatch(reservation -> reservation.isActivated());
+        assertThat(reservations)
+                .allMatch(reservation -> reservation.isActivated());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -163,7 +164,8 @@ public class StoreTest {
         log.debug("before close addedReservations : {}", reservations);
         store.close();
         log.debug("after close addedReservations : {}", reservations);
-        assertThat(reservations).allMatch(reservation -> !reservation.isActivated());
+        assertThat(reservations)
+                .allMatch(reservation -> !reservation.isActivated());
     }
 
     @Test
@@ -173,7 +175,8 @@ public class StoreTest {
         store.addMenu(menuForReservation);
         store.addReservation()
                 .with(menuForReservation, defaultMaxCount());
-        assertThat(store.getLastUsedMenus()).contains(menuForReservation);
+        assertThat(store.getLastUsedMenus())
+                .anyMatch(menu -> menu.isSameMenu(menuForReservation));
     }
 
     @Test
@@ -182,10 +185,12 @@ public class StoreTest {
         Menu menuForReservation = notLastUsedMenu();
         store.addMenu(lastUsedMenu);
         store.addMenu(menuForReservation);
-        assertThat(store.getLastUsedMenus()).contains(lastUsedMenu);
+        assertThat(store.getLastUsedMenus())
+                .anyMatch(menu -> menu.isSameMenu(lastUsedMenu));
         store.addReservation()
                 .with(menuForReservation, defaultMaxCount());
-        assertThat(store.getLastUsedMenus()).doesNotContain(lastUsedMenu);
+        assertThat(store.getLastUsedMenus())
+                .noneMatch(menu -> menu.isSameMenu(lastUsedMenu));
     }
 
 
