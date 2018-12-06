@@ -177,4 +177,11 @@ public class Store implements ReservationGeneratable {
                 .filter(reservation -> reservation != null)
                 .collect(Collectors.toList());
     }
+
+    @Deprecated
+    void close() {
+        timeToClose = LocalDateTime.now();
+        getActiveReservations()
+                .forEach(reservation -> reservation.setActivated(Reservation.DEACTIVATED));
+    }
 }

@@ -92,6 +92,10 @@ public class StoreTest {
                 .with(menuForReservation, defaultMaxCount());
     }
 
+    public void test(){
+        store = unClosedStore();
+    }
+
     @Test(expected = NoSuchElementException.class)
     public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
         Menu menuForReservation = deletedMenu();
@@ -147,8 +151,17 @@ public class StoreTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void Store가_닫힌_상태가_될_때_활성화_상태의_Reservation들은_비활성화_상태로() {
-
+        Menu menuForReservation = unDeletedMenu();
+        store.addMenu(menuForReservation);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        List<Reservation> reservations = store.getActiveReservations();
+        log.debug("before close addedReservations : {}", reservations);
+        store.close();
+        log.debug("after close addedReservations : {}", reservations);
+        assertThat(reservations).allMatch(reservation -> !reservation.isActivated());
     }
 
     @Test
