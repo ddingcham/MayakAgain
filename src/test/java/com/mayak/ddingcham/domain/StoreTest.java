@@ -178,7 +178,14 @@ public class StoreTest {
 
     @Test
     public void 새로운_Reservation이_등록될_때_기존에_마지막_사용되었던_Menu의_상태를_업데이트() {
-
+        Menu lastUsedMenu = lastUsedMenu();
+        Menu menuForReservation = notLastUsedMenu();
+        store.addMenu(lastUsedMenu);
+        store.addMenu(menuForReservation);
+        assertThat(store.getLastUsedMenus()).contains(lastUsedMenu);
+        store.addReservation()
+                .with(menuForReservation, defaultMaxCount());
+        assertThat(store.getLastUsedMenus()).doesNotContain(lastUsedMenu);
     }
 
 
