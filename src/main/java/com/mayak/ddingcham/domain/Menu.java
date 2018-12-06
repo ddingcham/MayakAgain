@@ -101,6 +101,7 @@ public class Menu {
                 .maxCount(maxCount)
                 .build();
         reservations.add(reservation);
+        lastUsed = LAST_USED;
         return reservation;
     }
 
