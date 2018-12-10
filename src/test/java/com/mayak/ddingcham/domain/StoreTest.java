@@ -215,4 +215,39 @@ public class StoreTest {
         softly.assertThat(store.getAddress()).isEqualTo(newInfo.getAddress());
         softly.assertAll();
     }
+
+    @Test
+    public void addOrder() {
+
+    }
+
+    @Test
+    public void addOrder_새로운_Order는_열린_상태의_Store에_대해서만_생성될_수_있다() {
+
+    }
+
+    @Test
+    public void addOrder_새로운_OrderItem은_Order가_생성될_때_생성할_수_있다() {
+
+    }
+
+    @Test
+    public void 활성화된_Reservation에_대해서만_OrderItem이_생성될_수_있다() {
+
+    }
+
+    @Test
+    public void 새로운_OrderItem은_Reservation의_개인별_최대_주문_갯수를_초과할_수_없다() {
+
+    }
+
+    @Test
+    public void 새로운_OrderItem은_Reservation의_현재_주문_가능한_갯수를_초과할_수_없다() {
+
+    }
+
+    @Test
+    public void 새로_생성한_OrderItem의_갯수만큼_Reservation의_현재_주문_가능한_갯수를_줄인다() {
+
+    }
 }
