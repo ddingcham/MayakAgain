@@ -69,6 +69,7 @@ public class MenuService {
             throw new RuntimeException("메뉴 삭제 권한이 없습니다");
         }
         menu.deleteMenu();
+//        store.removeMenu(menuRepository.findById(menuId).orElseThrow(()-> new EntityNotFoundException("없음"));
         return menu;
     }
     private Store getStoreByStoreId(long storeId){
