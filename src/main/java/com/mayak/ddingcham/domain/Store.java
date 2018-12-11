@@ -120,7 +120,6 @@ public class Store {
         if (hasMenuNotDeleted(menu)) {
             throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
         }
-
         menus.add(menu);
     }
 

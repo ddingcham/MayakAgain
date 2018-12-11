@@ -160,36 +160,55 @@ public class StoreTest {
         assertThat(store.findOrdersByPickupDate(pickupTime.toLocalDate())).contains(order);
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void addOrder_새로운_Order는_열린_상태의_Store에_대해서만_생성될_수_있다() {
-
+        addReservation();
+        store.close();
+        store.addOrder(new Customer(), LocalDateTime.now());
     }
 
-    @Test
-    public void addOrder_새로운_OrderItem은_Order가_생성될_때_생성할_수_있다() {
-
-    }
-
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void addOrder_활성화된_Reservation에_대해서만_OrderItem이_생성될_수_있다() {
-
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        reservations
+                .forEach(reservation -> reservation.setActivated(Reservation.RESERVATION_DEACTIVATED));
+        store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), 1);
     }
 
-    @Test
-    public void addOrder_새로운_OrderItem은_1개_이상이다() {}
+    @Test(expected = IllegalArgumentException.class)
+    public void addOrder_새로운_OrderItem은_1개_이상이다() {
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), 0);
+    }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void addOrder_새로운_OrderItem은_Reservation의_개인별_최대_주문_갯수를_초과할_수_없다() {
-
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), defaultMaxCount().getPersonalMaxCount() + 1);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void addOrder_새로운_OrderItem은_Reservation의_현재_주문_가능한_갯수를_초과할_수_없다() {
-
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), defaultMaxCount().getMaxCount() + 1);
     }
 
     @Test
     public void addOrder_새로_생성한_OrderItem의_갯수만큼_Reservation의_현재_주문_가능한_갯수를_줄인다() {
-
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), defaultMaxCount().getPersonalMaxCount());
+        assertThat(store.addOrder(new Customer(), LocalDateTime.now())
+                .with(reservations.get(0).getId(), 1))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
