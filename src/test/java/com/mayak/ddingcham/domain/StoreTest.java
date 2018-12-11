@@ -16,11 +16,12 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 public class StoreTest {
 
     private Store store;
-    private SoftAssertions softly = new SoftAssertions();
+    private SoftAssertions softly;
 
     @Before
     public void setUp() {
         store = Store.builder().build();
+        softly = new SoftAssertions();
     }
 
 
@@ -218,7 +219,16 @@ public class StoreTest {
 
     @Test
     public void addOrder() {
+        Customer customer;
+        LocalDateTime pickupTime;
 
+        Order order = store.addOrder(customer, pickupTime)
+                .with(reservationId, itemCount)
+                .with(reservationId, itemCount)
+                .with(reservationId, itemCount)
+                .purchase();
+
+        assertThat(store.findOrdersOnActiveReservations()).contains(order);
     }
 
     @Test

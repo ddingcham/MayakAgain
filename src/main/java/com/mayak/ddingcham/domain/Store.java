@@ -173,8 +173,8 @@ public class Store {
     }
 
     /**
-      * @deprecated (테스트 상황을 조성하기 위해 만듬 -> test double로 대체 예정)
-      */
+     * @deprecated (테스트 상황을 조성하기 위해 만듬 - > test double로 대체 예정)
+     */
     @Deprecated
     void close() {
         timeToClose = LocalDateTime.now();
@@ -189,8 +189,7 @@ public class Store {
     }
 
     class ReservationRegister {
-        private ReservationRegister() {
-        }
+        private ReservationRegister() {}
 
         public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
             searchMenuNotDeleted(menuForReservation)
