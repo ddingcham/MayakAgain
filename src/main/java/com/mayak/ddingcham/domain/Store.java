@@ -1,13 +1,12 @@
 package com.mayak.ddingcham.domain;
 
 import com.mayak.ddingcham.domain.support.MaxCount;
-import com.mayak.ddingcham.dto.MenuOutputDTO;
-import com.mayak.ddingcham.exception.InvalidStateOnStore;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,7 +30,6 @@ public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    //todo length 등 다른 조건들
     @Column(nullable = false, length = 40)
     private String storeName;
 
@@ -62,14 +60,22 @@ public class Store {
     @OneToOne
     private User user;
 
-    // Todo 제약사항 추가
     private LocalDateTime timeToClose;
 
-    // Todo Cascade issue 다른 옵션도 적용해야 할 수도 있음
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH})
-    @Where(clause = "deleted = false")
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_menu_store"))
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Where(clause = "activated = true")
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OrderBy("pickupTime")
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
 
     public boolean isOpen() {
         return updateOpenStatus();
@@ -78,39 +84,18 @@ public class Store {
     @PostPersist
     @PostUpdate
     @PostLoad
+    @SuppressWarnings("deprecation")
     public boolean updateOpenStatus() {
         if (timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
+            close();
             return CLOSE;
         }
         return OPEN;
     }
 
-    public void deactivate() {
-        timeToClose = null;
-    }
-
     public void activate(LocalDateTime timeToClose) {
-        menus.stream().forEach(menu -> menu.dropLastUsedStatus());
+        menus.stream().forEach(Menu::dropLastUsedStatus);
         this.timeToClose = timeToClose;
-    }
-
-    public List<MenuOutputDTO> getMenuOutputDTOList() {
-        List<MenuOutputDTO> menuDTOs = new ArrayList<>();
-        this.menus.stream().forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
-        return menuDTOs;
-    }
-
-    public List<MenuOutputDTO> getUsedMenuOutputDTOList() {
-        List<MenuOutputDTO> menuDTOs = new ArrayList<>();
-        this.menus.stream().filter(Menu::isLastUsed).forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
-        return menuDTOs;
-    }
-
-    public void updateLastUsedMenu(Menu menu, MaxCount maxCount) {
-        if (isOpen() == CLOSE)
-            throw new InvalidStateOnStore("Cannot update menu status on closed store");
-        this.menus.stream().filter(x -> x.equals(menu)).findAny().orElseThrow(() -> new InvalidStateOnStore("Cannot find menu on store"))
-                .setUpLastUsedStatus(maxCount);
     }
 
     public boolean hasSameOwner(User other) {
@@ -135,7 +120,6 @@ public class Store {
         if (hasMenuNotDeleted(menu)) {
             throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
         }
-
         menus.add(menu);
     }
 
@@ -156,34 +140,86 @@ public class Store {
                 .findAny();
     }
 
-    public ReservationRegister addReservation() {
+    public ReservationRegister addReservation(LocalDateTime timeToClose) {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
         menus.stream()
-                .filter(menu -> menu.isLastUsed())
-                .forEach(menu -> menu.dropLastUsedStatus());
+                .filter(Menu::isLastUsed)
+                .forEach(Menu::dropLastUsedStatus);
+        setTimeToClose(timeToClose);
         return new ReservationRegister();
     }
 
     public List<Reservation> getActiveReservations() {
-        return menus.stream()
-                .map(menu -> menu.getActiveReservation())
-                .filter(reservation -> reservation != null)
+        return reservations.stream()
+                .filter(Reservation::isActivated)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @deprecated (테스트 상황을 조성하기 위해 만듬 - > test double로 대체 예정)
+     */
     @Deprecated
     void close() {
         timeToClose = LocalDateTime.now();
         getActiveReservations()
-                .forEach(reservation -> reservation.setActivated(Reservation.DEACTIVATED));
+                .forEach(reservation -> reservation.setActivated(Reservation.RESERVATION_DEACTIVATED));
     }
 
     public List<Menu> getLastUsedMenus() {
         return menus.stream()
-                .filter(menu -> menu.isLastUsed())
+                .filter(Menu::isLastUsed)
                 .collect(Collectors.toList());
+    }
+
+    public OrderRegister addOrder(Customer customer, LocalDateTime pickupTime) {
+        if(isOpen() == CLOSE){
+            throw new IllegalStateException();
+        }
+        return new OrderRegister(customer, pickupTime);
+    }
+
+    public List<Order> findOrdersByPickupDate(LocalDate pickupDate) {
+        return orders.stream()
+                .filter(order -> order.matchedPickupDate(pickupDate))
+                .collect(Collectors.toList());
+    }
+
+    class OrderRegister {
+        private Order order;
+
+        private OrderRegister(Customer customer, LocalDateTime pickupTime) {
+            order = Order.builder()
+                    .customer(customer)
+                    .pickupTime(pickupTime)
+                    .build();
+        }
+
+        public OrderRegister with(long reservationId, int itemCount) {
+            if(itemCount < 1) throw new IllegalArgumentException();
+            Reservation reservation = findReservationById(reservationId);
+            if(reservation.isActivated()) {
+                order.addOrderItem(OrderItem.builder()
+                        .reservation(reservation.checkPossiblePurchase(itemCount))
+                        .itemCount(itemCount)
+                        .build());
+                return this;
+            }
+            throw new IllegalStateException();
+        }
+
+        private Reservation findReservationById(long reservationId) {
+            return reservations.stream()
+                    .filter(reservation -> reservation.isSameId(reservationId))
+                    .findAny()
+                    .orElseThrow(NoSuchElementException::new);
+        }
+
+        public Order purchase() {
+            orders.add(order);
+            return order;
+        }
     }
 
     class ReservationRegister {
@@ -191,9 +227,14 @@ public class Store {
         }
 
         public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
-            searchMenuNotDeleted(menuForReservation)
-                    .orElseThrow(NoSuchElementException::new)
-                    .addReservation(maxCount);
+            reservations.add(Reservation.builder()
+                    .openDate(LocalDate.now())
+                    .activated(Reservation.RESERVATION_ACTIVATED)
+                    .maxCount(maxCount)
+                    .menu(searchMenuNotDeleted(menuForReservation)
+                            .orElseThrow(NoSuchElementException::new)
+                            .setUpLastUsedStatus(maxCount))
+                    .build());
             return this;
         }
     }

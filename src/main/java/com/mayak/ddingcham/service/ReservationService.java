@@ -39,7 +39,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationFormDTO.generateReservations(store);
 
         store.activate(timeToClose);
-        reservations.forEach(reservation -> reservation.regist());
+//        reservations.forEach(reservation -> reservation.regist());
         return reservationRepository.saveAll(reservations);
     }
 
