@@ -6,6 +6,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -219,16 +220,18 @@ public class StoreTest {
 
     @Test
     public void addOrder() {
-        Customer customer;
-        LocalDateTime pickupTime;
+        addReservation();
+        List<Reservation> reservations = store.getActiveReservations();
+        Customer customer = new Customer();
+        LocalDateTime pickupTime = LocalDateTime.now();
 
         Order order = store.addOrder(customer, pickupTime)
-                .with(reservationId, itemCount)
-                .with(reservationId, itemCount)
-                .with(reservationId, itemCount)
+                .with(reservations.get(0).getId(), 1)
                 .purchase();
 
-        assertThat(store.findOrdersOnActiveReservations()).contains(order);
+        log.debug("newOrder : {}", order);
+
+        assertThat(store.findOrdersByPickupDate(pickupTime.toLocalDate())).contains(order);
     }
 
     @Test

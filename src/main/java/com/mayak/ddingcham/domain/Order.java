@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,5 +62,9 @@ public class Order{
 
     public boolean hasSameStore(Store store) {
         return this.store.equals(store);
+    }
+
+    public boolean matchedPickupDate(LocalDate pickupDate) {
+        return pickupTime.toLocalDate().equals(pickupDate);
     }
 }

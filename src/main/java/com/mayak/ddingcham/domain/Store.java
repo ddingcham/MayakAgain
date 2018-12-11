@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,6 +68,16 @@ public class Store {
     @Where(clause = "deleted = false")
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = {CascadeType.DETACH})
+    @Where(clause = "activated = true")
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = {CascadeType.DETACH})
+    @OrderBy("pickupTime")
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
 
     public boolean isOpen() {
         return updateOpenStatus();
@@ -188,13 +199,56 @@ public class Store {
                 .collect(Collectors.toList());
     }
 
+    private Reservation findReservationById(long reservationId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.isSameId(reservationId))
+                .findAny()
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    public OrderRegister addOrder(Customer customer, LocalDateTime pickupTime) {
+        return new OrderRegister(customer, pickupTime);
+    }
+
+    public List<Order> findOrdersByPickupDate(LocalDate pickupDate) {
+        return orders.stream()
+                .filter(order -> order.matchedPickupDate(pickupDate))
+                .collect(Collectors.toList());
+    }
+
+    class OrderRegister {
+        private Order order;
+
+        private OrderRegister(Customer customer, LocalDateTime pickupTime) {
+            order = Order.builder()
+                    .customer(customer)
+                    .pickupTime(pickupTime)
+                    .build();
+        }
+
+        public OrderRegister with(long reservationId, int itemCount) {
+            order.addOrderItem(OrderItem.builder()
+                    .reservation(findReservationById(reservationId))
+                    .itemCount(itemCount)
+                    .build());
+            return this;
+        }
+
+        public Order purchase() {
+            orders.add(order);
+            return order;
+        }
+    }
+
     class ReservationRegister {
-        private ReservationRegister() {}
+        private ReservationRegister() {
+        }
 
         public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
-            searchMenuNotDeleted(menuForReservation)
+            Reservation reservation = searchMenuNotDeleted(menuForReservation)
                     .orElseThrow(NoSuchElementException::new)
                     .addReservation(maxCount);
+            reservations.add(reservation);
             return this;
         }
     }

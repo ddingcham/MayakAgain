@@ -24,7 +24,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @ManyToOne
     private Menu menu;
@@ -68,5 +68,9 @@ public class Reservation {
         if (this.availableCount < itemCount) {
             throw new IllegalStateException("Cannot buy");
         }
+    }
+
+    public boolean isSameId(long reservationId) {
+        return getId() == reservationId;
     }
 }
