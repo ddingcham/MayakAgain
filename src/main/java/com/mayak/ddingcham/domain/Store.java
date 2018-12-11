@@ -95,10 +95,6 @@ public class Store {
         return OPEN;
     }
 
-    public void deactivate() {
-        timeToClose = null;
-    }
-
     public void activate(LocalDateTime timeToClose) {
         menus.stream().forEach(Menu::dropLastUsedStatus);
         this.timeToClose = timeToClose;
@@ -114,13 +110,6 @@ public class Store {
         List<MenuOutputDTO> menuDTOs = new ArrayList<>();
         this.menus.stream().filter(Menu::isLastUsed).forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
         return menuDTOs;
-    }
-
-    public void updateLastUsedMenu(Menu menu, MaxCount maxCount) {
-        if (isOpen() == CLOSE)
-            throw new InvalidStateOnStore("Cannot update menu status on closed store");
-        this.menus.stream().filter(x -> x.equals(menu)).findAny().orElseThrow(() -> new InvalidStateOnStore("Cannot find menu on store"))
-                .setUpLastUsedStatus(maxCount);
     }
 
     public boolean hasSameOwner(User other) {

@@ -43,17 +43,8 @@ public class Reservation {
 
     private boolean activated;
 
-    @JsonGetter("maxLimit")
-    public int calculateMaxLimit() {
-        return this.availableCount < this.maxCount.getPersonalMaxCount() ? this.availableCount : this.maxCount.getPersonalMaxCount();
-    }
-
     public void orderMenu(int count) {
         this.availableCount -= count;
-    }
-
-    public int calculatePrice(int itemCount) {
-        return this.menu.calculatePrice(itemCount);
     }
 
     public void checkPossiblePurchase(int itemCount) {
