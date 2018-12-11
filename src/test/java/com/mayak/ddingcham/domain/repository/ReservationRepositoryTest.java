@@ -157,7 +157,7 @@ public class ReservationRepositoryTest {
         log.debug("defaultMaxCount : {}", defaultMaxCount());
         return Reservation.builder()
                 .maxCount(defaultMaxCount())
-                .store(defaultStore)
+//                .store(defaultStore)
                 .menu(defaultMenu)
                 .openDate(openDate)
                 .build();

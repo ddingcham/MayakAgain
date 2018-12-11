@@ -1,6 +1,5 @@
 package com.mayak.ddingcham.domain;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.*;
@@ -27,6 +26,7 @@ public class Reservation {
     private long id;
 
     @ManyToOne
+    @Column(nullable = false)
     private Menu menu;
 
     @Embedded

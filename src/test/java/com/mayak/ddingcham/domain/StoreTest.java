@@ -176,6 +176,9 @@ public class StoreTest {
     }
 
     @Test
+    public void addOrder_새로운_OrderItem은_1개_이상이다() {}
+
+    @Test
     public void addOrder_새로운_OrderItem은_Reservation의_개인별_최대_주문_갯수를_초과할_수_없다() {
 
     }

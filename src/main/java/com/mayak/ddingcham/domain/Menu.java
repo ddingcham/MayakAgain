@@ -1,15 +1,11 @@
 package com.mayak.ddingcham.domain;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -49,37 +45,20 @@ public class Menu {
     @Embedded
     private MaxCount maxCount;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_menu_store"), nullable = false)
-    @ToString.Exclude
-    @JsonIgnore
-    private Store store;
-
     private boolean lastUsed;
-
-    @OneToMany
-    @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
 
     public void deleteMenu() {
         this.deleted = MENU_DELETED;
     }
 
-    public void setUpLastUsedStatus(MaxCount maxCount) {
+    public Menu setUpLastUsedStatus(MaxCount maxCount) {
         this.maxCount = maxCount;
         this.lastUsed = MENU_LAST_USED;
+        return this;
     }
 
     public void dropLastUsedStatus() {
         lastUsed = MENU_NOT_LAST_USED;
-    }
-
-    public boolean isLastUsed() {
-        return lastUsed;
-    }
-
-    public boolean hasSameStore(Store store) {
-        return this.store.equals(store);
     }
 
     public boolean isSameMenu(Menu other) {
@@ -88,23 +67,5 @@ public class Menu {
 
     private boolean isNotEmptyMenu(Menu other) {
         return other.name != null && other.description != null;
-    }
-
-    Reservation addReservation(MaxCount maxCount) {
-        Reservation reservation = Reservation.builder()
-                .openDate(LocalDate.now())
-                .activated(Reservation.RESERVATION_ACTIVATED)
-                .maxCount(maxCount)
-                .build();
-        reservations.add(reservation);
-        setUpLastUsedStatus(maxCount);
-        return reservation;
-    }
-
-    Reservation getActiveReservation() {
-        return reservations.stream()
-                .filter(Reservation::isActivated)
-                .findAny()
-                .orElse(null);
     }
 }

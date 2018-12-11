@@ -1,8 +1,6 @@
 package com.mayak.ddingcham.domain;
 
 import com.mayak.ddingcham.domain.support.MaxCount;
-import com.mayak.ddingcham.dto.MenuOutputDTO;
-import com.mayak.ddingcham.exception.InvalidStateOnStore;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
@@ -64,17 +62,17 @@ public class Store {
 
     private LocalDateTime timeToClose;
 
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH})
-    @Where(clause = "deleted = false")
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_menu_store"))
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.DETACH})
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     @Where(clause = "activated = true")
     @Builder.Default
     private List<Reservation> reservations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.DETACH})
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     @OrderBy("pickupTime")
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
@@ -98,18 +96,6 @@ public class Store {
     public void activate(LocalDateTime timeToClose) {
         menus.stream().forEach(Menu::dropLastUsedStatus);
         this.timeToClose = timeToClose;
-    }
-
-    public List<MenuOutputDTO> getMenuOutputDTOList() {
-        List<MenuOutputDTO> menuDTOs = new ArrayList<>();
-        this.menus.stream().forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
-        return menuDTOs;
-    }
-
-    public List<MenuOutputDTO> getUsedMenuOutputDTOList() {
-        List<MenuOutputDTO> menuDTOs = new ArrayList<>();
-        this.menus.stream().filter(Menu::isLastUsed).forEach(e -> menuDTOs.add(MenuOutputDTO.createUsedMenuOutputDTO(e)));
-        return menuDTOs;
     }
 
     public boolean hasSameOwner(User other) {
@@ -166,9 +152,8 @@ public class Store {
     }
 
     public List<Reservation> getActiveReservations() {
-        return menus.stream()
-                .map(Menu::getActiveReservation)
-                .filter(Objects::nonNull)
+        return reservations.stream()
+                .filter(Reservation::isActivated)
                 .collect(Collectors.toList());
     }
 
@@ -186,13 +171,6 @@ public class Store {
         return menus.stream()
                 .filter(Menu::isLastUsed)
                 .collect(Collectors.toList());
-    }
-
-    private Reservation findReservationById(long reservationId) {
-        return reservations.stream()
-                .filter(reservation -> reservation.isSameId(reservationId))
-                .findAny()
-                .orElseThrow(NoSuchElementException::new);
     }
 
     public OrderRegister addOrder(Customer customer, LocalDateTime pickupTime) {
@@ -223,6 +201,13 @@ public class Store {
             return this;
         }
 
+        private Reservation findReservationById(long reservationId) {
+            return reservations.stream()
+                    .filter(reservation -> reservation.isSameId(reservationId))
+                    .findAny()
+                    .orElseThrow(NoSuchElementException::new);
+        }
+
         public Order purchase() {
             orders.add(order);
             return order;
@@ -234,10 +219,14 @@ public class Store {
         }
 
         public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
-            Reservation reservation = searchMenuNotDeleted(menuForReservation)
-                    .orElseThrow(NoSuchElementException::new)
-                    .addReservation(maxCount);
-            reservations.add(reservation);
+            reservations.add(Reservation.builder()
+                    .openDate(LocalDate.now())
+                    .activated(Reservation.RESERVATION_ACTIVATED)
+                    .maxCount(maxCount)
+                    .menu(searchMenuNotDeleted(menuForReservation)
+                            .orElseThrow(NoSuchElementException::new)
+                            .setUpLastUsedStatus(maxCount))
+                    .build());
             return this;
         }
     }

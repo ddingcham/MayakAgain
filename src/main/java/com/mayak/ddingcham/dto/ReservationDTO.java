@@ -22,7 +22,7 @@ public class ReservationDTO {
     public Reservation toDomain(Store store) {
         return Reservation.builder()
                 .maxCount(maxCount)
-                .store(store)
+//                .store(store)
                 // todo refactoring & orElse //store.getMenuById(menuId))
                 .menu(store.getMenus().stream().filter(x-> x.getId() == menuId).findFirst().get())
                 .openDate(LocalDate.now())

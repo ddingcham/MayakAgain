@@ -83,15 +83,15 @@ public class TempTestCode {
         menu = menuRepository.save(menu);
         //assertThat(store.getMenus....(menu.getId()))
         assertThat(menu.getStore()).isEqualTo(store);
-        assertThat(menu.hasSameStore(store)).isTrue();
+//        assertThat(menu.hasSameStore(store)).isTrue();
     }
 
     @Test
     public void test_ReservationFormDTO_generateReservations() {
         List<Reservation> reservations = reservationFormDTO.generateReservations(store);
         softly.assertThat(reservations
-                .stream()
-                .filter(reservation -> reservation.getStore() == null))
+                .stream())
+//                .filter(reservation -> reservation.getStore() == null))
                 .as("Store 다 넣어줬는지")
                 .isEmpty();
         softly.assertThat(reservations
