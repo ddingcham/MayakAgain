@@ -29,10 +29,6 @@ public class Reservation {
     @ManyToOne
     private Menu menu;
 
-    @ManyToOne
-    @ToString.Exclude
-    private Store store;
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "maxCount", column = @Column(nullable = false)),
@@ -50,10 +46,6 @@ public class Reservation {
     @JsonGetter("maxLimit")
     public int calculateMaxLimit() {
         return this.availableCount < this.maxCount.getPersonalMaxCount() ? this.availableCount : this.maxCount.getPersonalMaxCount();
-    }
-
-    public void regist() {
-        this.store.updateLastUsedMenu(menu, maxCount);
     }
 
     public void orderMenu(int count) {
