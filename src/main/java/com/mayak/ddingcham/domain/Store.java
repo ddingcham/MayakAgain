@@ -140,13 +140,14 @@ public class Store {
                 .findAny();
     }
 
-    public ReservationRegister addReservation() {
+    public ReservationRegister addReservation(LocalDateTime timeToClose) {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
         menus.stream()
                 .filter(Menu::isLastUsed)
                 .forEach(Menu::dropLastUsedStatus);
+        setTimeToClose(timeToClose);
         return new ReservationRegister();
     }
 
@@ -173,6 +174,9 @@ public class Store {
     }
 
     public OrderRegister addOrder(Customer customer, LocalDateTime pickupTime) {
+        if(isOpen() == CLOSE){
+            throw new IllegalStateException();
+        }
         return new OrderRegister(customer, pickupTime);
     }
 
@@ -193,11 +197,16 @@ public class Store {
         }
 
         public OrderRegister with(long reservationId, int itemCount) {
-            order.addOrderItem(OrderItem.builder()
-                    .reservation(findReservationById(reservationId))
-                    .itemCount(itemCount)
-                    .build());
-            return this;
+            if(itemCount < 1) throw new IllegalArgumentException();
+            Reservation reservation = findReservationById(reservationId);
+            if(reservation.isActivated()) {
+                order.addOrderItem(OrderItem.builder()
+                        .reservation(reservation.checkPossiblePurchase(itemCount))
+                        .itemCount(itemCount)
+                        .build());
+                return this;
+            }
+            throw new IllegalStateException();
         }
 
         private Reservation findReservationById(long reservationId) {

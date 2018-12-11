@@ -1,6 +1,7 @@
 package com.mayak.ddingcham.domain;
 
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.mayak.ddingcham.domain.FixtureUtils.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Slf4j
@@ -73,7 +75,7 @@ public class StoreTest {
     public void addReservation() {
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
         List<Reservation> reservations = store.getActiveReservations();
         log.debug("addedReservations : {}", reservations);
@@ -86,7 +88,7 @@ public class StoreTest {
         store = unClosedStore();
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
     }
 
@@ -94,14 +96,14 @@ public class StoreTest {
     public void addReservation_삭제된_Menu에_대해서_생성할_경우() {
         Menu menuForReservation = deletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void addReservation_없는_Menu에_대해서_생성할_경우() {
         Menu menuForReservation = unDeletedMenu();
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
     }
 
@@ -110,7 +112,7 @@ public class StoreTest {
     public void addReservation_Store가_닫힌_상태가_될_때_활성화_상태의_Reservation들은_비활성화_상태로() {
         Menu menuForReservation = unDeletedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
         List<Reservation> reservations = store.getActiveReservations();
         log.debug("before close addedReservations : {}", reservations);
@@ -124,7 +126,7 @@ public class StoreTest {
     public void addReservation_새로운_Reservation이_등록될_때_해당하는_Menu들의_마지막_사용_여부_업데이트() {
         Menu menuForReservation = notLastUsedMenu();
         store.addMenu(menuForReservation);
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
         assertThat(store.getLastUsedMenus())
                 .anyMatch(menu -> menu.isSameMenu(menuForReservation));
@@ -138,7 +140,7 @@ public class StoreTest {
         store.addMenu(menuForReservation);
         assertThat(store.getLastUsedMenus())
                 .anyMatch(menu -> menu.isSameMenu(lastUsedMenu));
-        store.addReservation()
+        store.addReservation(LocalDateTime.MAX)
                 .with(menuForReservation, defaultMaxCount());
         assertThat(store.getLastUsedMenus())
                 .noneMatch(menu -> menu.isSameMenu(lastUsedMenu));
@@ -164,6 +166,7 @@ public class StoreTest {
     public void addOrder_새로운_Order는_열린_상태의_Store에_대해서만_생성될_수_있다() {
         addReservation();
         store.close();
+        store.setTimeToClose(LocalDateTime.MIN);
         store.addOrder(new Customer(), LocalDateTime.now());
     }
 
@@ -207,7 +210,7 @@ public class StoreTest {
         List<Reservation> reservations = store.getActiveReservations();
         store.addOrder(new Customer(), LocalDateTime.now())
                 .with(reservations.get(0).getId(), defaultMaxCount().getPersonalMaxCount());
-        assertThat(store.addOrder(new Customer(), LocalDateTime.now())
+        assertThatThrownBy(() -> store.addOrder(new Customer(), LocalDateTime.now())
                 .with(reservations.get(0).getId(), 1))
                 .isInstanceOf(IllegalArgumentException.class);
     }

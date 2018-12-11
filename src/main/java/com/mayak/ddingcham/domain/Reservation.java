@@ -10,9 +10,6 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Builder
 @EqualsAndHashCode(of = "id")
 @ToString
 @Slf4j
@@ -43,14 +40,27 @@ public class Reservation {
 
     private boolean activated;
 
+    Reservation(){}
+
+    @Builder
+    Reservation(Menu menu, MaxCount maxCount, LocalDate openDate, boolean activated) {
+        this.menu = menu;
+        this.maxCount = maxCount;
+        this.openDate = openDate;
+        this.availableCount = maxCount.getMaxCount();
+        this.activated = activated;
+    }
+
     public void orderMenu(int count) {
         this.availableCount -= count;
     }
 
-    public void checkPossiblePurchase(int itemCount) {
+    public Reservation checkPossiblePurchase(int itemCount) {
         if (this.availableCount < itemCount) {
-            throw new IllegalStateException("Cannot buy");
+            throw new IllegalArgumentException("itemCount가 너무 많음");
         }
+        availableCount -= itemCount;
+        return this;
     }
 
     public boolean isSameId(long reservationId) {
