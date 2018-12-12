@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -46,30 +47,24 @@ public class MenuService {
         storeRepository.save(store);
     }
 
-    public List<MenuOutputDTO> findAllMenuInStore(User user) {
-        Store store = storeRepository.findByUser(user).get();
-        return store.getUsedMenuOutputDTOList();
-    }
     //todo cacheable, cacheEvict on reservation registration
     public List<MenuOutputDTO> getLastUsedMenusInStore(Store store) {
-        return store.getUsedMenuOutputDTOList();
+        return null;
+//        return store.getUsedMenuOutputDTOList();
     }
 
     //todo cacheable, cacheEvict on reservation registration
     public List<MenuOutputDTO> findAllMenuInStore(Store store) {
-        return store.getMenuOutputDTOList();
+        return null;
+//        return store.getMenuOutputDTOList();
     }
 
     @Transactional
     public Menu deleteMenu(Store store, long menuId) {
-        Menu menu = menuRepository.findById(menuId).orElseThrow(
-                () -> new EntityNotFoundException("No Search Store By menuId : " + menuId)
-        );
-        if(!menu.hasSameStore(store)){
-            throw new RuntimeException("메뉴 삭제 권한이 없습니다");
-        }
-        menu.deleteMenu();
-//        store.removeMenu(menuRepository.findById(menuId).orElseThrow(()-> new EntityNotFoundException("없음"));
+        Menu menu = menuRepository
+                .findById(menuId)
+                .orElseThrow(NoSuchElementException::new);
+        store.removeMenu(menu);
         return menu;
     }
     private Store getStoreByStoreId(long storeId){

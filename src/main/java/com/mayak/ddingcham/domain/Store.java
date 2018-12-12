@@ -62,17 +62,16 @@ public class Store {
 
     private LocalDateTime timeToClose;
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_menu_store"))
+    @OneToMany(cascade = CascadeType.ALL)
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @Where(clause = "activated = true")
     @Builder.Default
     private List<Reservation> reservations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @OrderBy("pickupTime")
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
@@ -81,10 +80,6 @@ public class Store {
         return updateOpenStatus();
     }
 
-    @PostPersist
-    @PostUpdate
-    @PostLoad
-    @SuppressWarnings("deprecation")
     public boolean updateOpenStatus() {
         if (timeToClose == null || timeToClose.isBefore(LocalDateTime.now())) {
             close();

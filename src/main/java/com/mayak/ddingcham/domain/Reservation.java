@@ -22,8 +22,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @Column(nullable = false)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Menu menu;
 
     @Embedded

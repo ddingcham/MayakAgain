@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDate;
 import java.util.List;
 
 @Component(value = "currentReservation")
@@ -19,7 +18,8 @@ public class CurrentReservationSelector implements ReservationSelector{
     @Override
     public List<Reservation> select(Store store) {
         //todo Exception 날리기
-        List<Reservation> reservations = reservationRepository.findAllByStoreAndOpenDate(store, LocalDate.now());
+//        List<Reservation> reservations = reservationRepository.findAllByStoreIdAndOpenDate(store.getId(), LocalDate.now());
+        List<Reservation> reservations = reservationRepository.findAll();
         isExisted(reservations);
         return reservations;
     }

@@ -9,8 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
-    List<Reservation> findAllByStore(Store store);
-    List<Reservation> findAllByStoreId(long storeId);
-    List<Reservation> findAllByStoreAndOpenDate(Store store, LocalDate openDate);
-    Optional<Reservation> findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(Store defaultStore, LocalDate now);
+    List<Reservation> findAll();
+//    List<Reservation> findAllByStoreId(long storeId);
+//    List<Reservation> findAllByStoreIdAndOpenDate(long storeId, LocalDate openDate);
+//    Optional<Reservation> findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(long storeId, LocalDate now);
 }

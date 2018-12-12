@@ -45,7 +45,7 @@ public class ReservationRepositoryTest {
     public void list_current_reservations_있을때() {
         int expected = 3;
         setUp_current(expected);
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, LocalDate.now());
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), LocalDate.now());
         assertThat(actualReservations).isNotEmpty();
         assertThat(actualReservations.size()).isEqualTo(expected);
     }
@@ -54,7 +54,7 @@ public class ReservationRepositoryTest {
     public void list_current_reservations_없을때() {
         int expected = 0;
         setUp_current(expected);
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, LocalDate.now());
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), LocalDate.now());
         assertThat(actualReservations).isEmpty();
     }
 
@@ -74,13 +74,13 @@ public class ReservationRepositoryTest {
 
 
         LocalDate lastDate = reservationRepository
-                .findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(defaultStore, LocalDate.now())
+                .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
                 .get()
                 .getOpenDate();
 
         log.debug("lastDate : {}", lastDate);
 
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, lastDate);
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
         assertThat(actualReservations.size()).isEqualTo(expected);
@@ -93,13 +93,13 @@ public class ReservationRepositoryTest {
         setUp_last_case(expected, termOfPastDays);
 
         LocalDate lastDate = reservationRepository
-                .findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(defaultStore, LocalDate.now())
+                .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
                 .get()
                 .getOpenDate();
 
         log.debug("lastDate : {}", lastDate);
 
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, lastDate);
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
         assertThat(actualReservations.size()).isEqualTo(expected);

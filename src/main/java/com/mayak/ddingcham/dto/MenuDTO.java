@@ -68,7 +68,6 @@ public class MenuDTO implements Serializable {
                 .price(price)
                 .description(description)
                 .imageUrl(imageUrl)
-                .store(store)
                 .build();
     }
 
