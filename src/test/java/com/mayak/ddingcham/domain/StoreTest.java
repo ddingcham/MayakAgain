@@ -214,4 +214,5 @@ public class StoreTest {
                 .with(reservations.get(0).getId(), 1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
 }

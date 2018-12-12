@@ -128,20 +128,18 @@ public class ReservationRepositoryTest {
 
     private void prepareDefaultMenus() {
         defaultMenu = Menu.builder()
-                .store(defaultStore)
                 .name("test1")
                 .description("test1")
                 .price(1)
                 .imageUrl("/path")
                 .build();
-        defaultMenu = Menu.builder().store(defaultStore).name("test2").description("test2").price(2).imageUrl("/path").build();
         defaultStore.addMenu(defaultMenu);
         defaultStore = storeRepository.save(defaultStore);
         defaultMenu = defaultStore.getMenus().get(0);
     }
 
     private void preparePastReservations() {
-        targetReservations = new ArrayList<Reservation>();
+        targetReservations = new ArrayList<>();
         targetReservations.addAll(
                 Arrays.asList(
                 generateTestReservation(PAST_DATE.plusYears(4L)),
@@ -157,7 +155,6 @@ public class ReservationRepositoryTest {
         log.debug("defaultMaxCount : {}", defaultMaxCount());
         return Reservation.builder()
                 .maxCount(defaultMaxCount())
-//                .store(defaultStore)
                 .menu(defaultMenu)
                 .openDate(openDate)
                 .build();
