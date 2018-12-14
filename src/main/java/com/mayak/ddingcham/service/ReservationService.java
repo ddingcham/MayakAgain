@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +44,8 @@ public class ReservationService {
 
     public Map<Long, Reservation> getTodayReservations(long storeId) {
         //todo : store의 오픈, 마감시간과 Reservation의 날짜 확인 필요
-        return convertReservationListToMap(reservationRepository.findAllByStoreId(storeId));
+//        return convertReservationListToMap(reservationRepository.findAllByStoreId(storeId));
+        return convertReservationListToMap(reservationRepository.findAll());
     }
 
     private Map<Long, Reservation> convertReservationListToMap(List<Reservation> reservations) {
@@ -60,8 +60,10 @@ public class ReservationService {
 
     public LocalDate getLastDay(Store store) {
         return reservationRepository
-                .findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(store, store.getTimeToClose().toLocalDate().minusDays(1))
-                .orElseThrow(() -> new EntityNotFoundException("Last Day가 존재하지 않는다."))
+//                .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(store.getId(), store.getTimeToClose().toLocalDate().minusDays(1))
+//                .orElseThrow(() -> new EntityNotFoundException("Last Day가 존재하지 않는다."))
+                .findAll()
+                .get(0)
                 .getOpenDate();
     }
 }

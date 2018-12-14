@@ -5,26 +5,29 @@ import com.mayak.ddingcham.domain.support.MaxCount;
 import java.time.LocalDateTime;
 
 public class FixtureUtils {
-    static Store unClosedStore() {
+    public static Store unClosedStore() {
         return Store.builder()
                 .timeToClose(LocalDateTime.MAX)
                 .build();
     }
 
-    static Menu deletedMenu() {
+    public static Menu deletedMenu() {
         return Menu.builder()
                 .name("deletedMenu")
                 .deleted(Menu.MENU_DELETED)
                 .build();
     }
 
-    static Menu unDeletedMenu() {
+    public static Menu unDeletedMenu() {
         return Menu.builder()
                 .name("unDeletedMenu")
+                .description("unDeletedMenu")
+                .price(1)
+                .imageUrl("/path")
                 .build();
     }
 
-    static Menu lastUsedMenu() {
+    public static Menu lastUsedMenu() {
         return Menu.builder()
                 .name("lastUsedMenu")
                 .deleted(Menu.MENU_UN_DELETED)
@@ -32,14 +35,15 @@ public class FixtureUtils {
                 .build();
     }
 
-    static Menu notLastUsedMenu() {
+    public static Menu notLastUsedMenu() {
         return Menu.builder()
                 .name("notLastUsedMenu")
                 .deleted(Menu.MENU_UN_DELETED)
+                .lastUsed(Menu.MENU_NOT_LAST_USED)
                 .build();
     }
 
-    static MaxCount defaultMaxCount() {
+    public static MaxCount defaultMaxCount() {
         return MaxCount.builder()
                 .maxCount(1)
                 .personalMaxCount(1)

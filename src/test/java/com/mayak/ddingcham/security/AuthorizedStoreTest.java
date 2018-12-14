@@ -92,7 +92,6 @@ public class AuthorizedStoreTest {
     }
     private void prepareDefaultMenus(Store store) {
         Menu defaultMenu = Menu.builder()
-                .store(store)
                 .name("test1")
                 .description("test1")
                 .price(1)

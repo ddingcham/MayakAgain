@@ -11,8 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,132 +37,120 @@ public class ReservationRepositoryTest {
     public void setUp() {
         prepareDefaultStore();
         prepareDefaultMenus();
-        preparePastReservations();
+        preparePastReservationsByStore();
+    }
+
+    @Test
+    public void setUpFixture() {
     }
 
     @Test
     public void list_current_reservations_있을때() {
-        int expected = 3;
-        setUp_current(expected);
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, LocalDate.now());
-        assertThat(actualReservations).isNotEmpty();
-        assertThat(actualReservations.size()).isEqualTo(expected);
+        Reservation reservation = setUpActiveReservation();
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), LocalDate.now());
+        assertThat(actualReservations)
+                .isNotEmpty()
+                .contains(reservation)
+                .allMatch(Reservation::isActivated);
     }
 
     @Test
     public void list_current_reservations_없을때() {
-        int expected = 0;
-        setUp_current(expected);
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, LocalDate.now());
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), LocalDate.now());
         assertThat(actualReservations).isEmpty();
     }
 
-    private void setUp_current(int expected) {
-        for (int i = 0; i < expected; i++) {
-            targetReservations.add(generateTestReservation(LocalDate.now()));
-        }
-        reservationRepository.saveAll(targetReservations);
+    private Reservation setUpActiveReservation() {
+        defaultStore.addReservation(LocalDateTime.now().plusDays(1L), LocalDate.now())
+                .with(defaultMenu, defaultMaxCount());
+        storeRepository.save(defaultStore);
+        return defaultStore.getActiveReservations().get(0);
     }
 
 
     @Test
     public void list_last_reservations_하루전() {
-        int expected = 3;
-        long termOfPastDays = 1;
-        setUp_last_case(expected, termOfPastDays);
-
+        long termOfPastDays = 1L;
+        setUpLastUsedReservation(termOfPastDays);
 
         LocalDate lastDate = reservationRepository
-                .findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(defaultStore, LocalDate.now())
+                .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
                 .get()
                 .getOpenDate();
 
         log.debug("lastDate : {}", lastDate);
 
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, lastDate);
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
-        assertThat(actualReservations.size()).isEqualTo(expected);
     }
 
     @Test
     public void list_last_reservations_여러날전() {
-        int expected = 5;
-        long termOfPastDays = 10;
-        setUp_last_case(expected, termOfPastDays);
+        long termOfPastDays = 10L;
+        setUpLastUsedReservation(termOfPastDays);
 
         LocalDate lastDate = reservationRepository
-                .findFirstByStoreAndOpenDateBeforeOrderByOpenDateDesc(defaultStore, LocalDate.now())
+                .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
                 .get()
                 .getOpenDate();
 
         log.debug("lastDate : {}", lastDate);
 
-        List<Reservation> actualReservations = reservationRepository.findAllByStoreAndOpenDate(defaultStore, lastDate);
+        List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
-        assertThat(actualReservations.size()).isEqualTo(expected);
     }
 
-    private void setUp_last_case(int expected, long termOfPastDays) {
-        for (int i = 0; i < expected; i++) {
-            targetReservations.add(generateTestReservation(LocalDate.now().minusDays(termOfPastDays)));
-        }
-        reservationRepository.saveAll(targetReservations);
+    private Reservation setUpLastUsedReservation(long termOfPastDays) {
+        LocalDateTime baseTime = LocalDateTime.now().minusDays(termOfPastDays);
+        defaultStore.addReservation(baseTime, baseTime.toLocalDate().minusDays(1L))
+                .with(defaultMenu, defaultMaxCount());
+        storeRepository.save(defaultStore);
+        Reservation lastUsedReservation = defaultStore.getActiveReservations().get(0);
+        setUpActiveReservation();
+        return lastUsedReservation;
     }
 
     private void prepareDefaultStore() {
         defaultStore = Store.builder()
                 .description("DESC")
                 .imgURL("img")
-                .ownerName("주인")
+                .ownerName("OWNER")
                 .phoneNumber("1234512345")
                 .postCode("12345")
-                .serviceDescription("create menu 가게관점")
-                .storeName("storeName")
+                .serviceDescription("reservation 조회 테스트용")
+                .storeName("defaultStore")
                 .address("ADDRESS")
                 .build();
         storeRepository.save(defaultStore);
     }
 
     private void prepareDefaultMenus() {
-        defaultMenu = Menu.builder()
-                .store(defaultStore)
-                .name("test1")
-                .description("test1")
-                .price(1)
-                .imageUrl("/path")
-                .build();
-        defaultMenu = Menu.builder().store(defaultStore).name("test2").description("test2").price(2).imageUrl("/path").build();
+        defaultMenu = FixtureUtils.unDeletedMenu();
         defaultStore.addMenu(defaultMenu);
         defaultStore = storeRepository.save(defaultStore);
-        defaultMenu = defaultStore.getMenus().get(0);
     }
 
-    private void preparePastReservations() {
-        targetReservations = new ArrayList<Reservation>();
-        targetReservations.addAll(
-                Arrays.asList(
-                generateTestReservation(PAST_DATE.plusYears(4L)),
-                generateTestReservation(PAST_DATE.plusYears(3L)),
-                generateTestReservation(PAST_DATE.plusYears(2L)),
-                generateTestReservation(PAST_DATE.plusYears(1L)),
-                generateTestReservation(PAST_DATE)
-        ));
-        reservationRepository.saveAll(targetReservations);
+    private void preparePastReservationsByStore() {
+        LocalDateTime baseTime;
+        for(long year=1L;year<5L;year++){
+            baseTime = LocalDateTime.MIN.plusYears(year);
+            defaultStore.addReservation(baseTime.plusDays(1L), baseTime.toLocalDate())
+                    .with(defaultMenu, defaultMaxCount());
+            storeRepository.save(defaultStore);
+        }
     }
 
-    private Reservation generateTestReservation(LocalDate openDate){
-        log.debug("defaultMaxCount : {}", defaultMaxCount());
+    private Reservation generateTestReservation(LocalDate openDate) {
         return Reservation.builder()
                 .maxCount(defaultMaxCount())
-//                .store(defaultStore)
                 .menu(defaultMenu)
                 .openDate(openDate)
                 .build();
     }
 
-    private MaxCount defaultMaxCount(){
+    private MaxCount defaultMaxCount() {
         return new MaxCount(2, 1);
     }
 }

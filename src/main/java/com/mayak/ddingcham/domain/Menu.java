@@ -38,7 +38,8 @@ public class Menu {
     private String description = "none";
 
     @Column(nullable = false, length = 400)
-    private String imageUrl;
+    @Builder.Default
+    private String imageUrl = "";
 
     private boolean deleted;
 
