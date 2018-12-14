@@ -133,15 +133,12 @@ public class ReservationRepositoryTest {
     }
 
     private void preparePastReservationsByStore() {
-        defaultStore.addReservation(LocalDateTime.MIN, LocalDate.MIN)
-                .with(defaultMenu, defaultMaxCount());
-        defaultStore.addReservation(LocalDateTime.MIN, LocalDate.MIN)
-                .with(defaultMenu, defaultMaxCount());
-        defaultStore.addReservation(LocalDateTime.MIN, LocalDate.MIN)
-                .with(defaultMenu, defaultMaxCount());
-        defaultStore.addReservation(LocalDateTime.MIN, LocalDate.MIN)
-                .with(defaultMenu, defaultMaxCount());
-        storeRepository.save(defaultStore);
+        for(long year=1L;year<5L;year++){
+            LocalDateTime baseTime = LocalDateTime.MIN.plusYears(year);
+            defaultStore.addReservation(baseTime.plusDays(1L), baseTime.toLocalDate())
+                    .with(defaultMenu, defaultMaxCount());
+            storeRepository.save(defaultStore);
+        }
     }
 
     private Reservation generateTestReservation(LocalDate openDate) {
