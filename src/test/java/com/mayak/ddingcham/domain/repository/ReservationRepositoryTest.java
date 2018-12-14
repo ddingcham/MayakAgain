@@ -135,7 +135,7 @@ public class ReservationRepositoryTest {
                 .build();
         defaultStore.addMenu(defaultMenu);
         defaultStore = storeRepository.save(defaultStore);
-        defaultMenu = defaultStore.getMenus().get(0);
+        defaultMenu = defaultStore.getMenus().stream().findFirst().get();
     }
 
     private void preparePastReservations() {

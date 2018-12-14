@@ -3,7 +3,6 @@ package com.mayak.ddingcham.domain;
 import com.mayak.ddingcham.domain.support.MaxCount;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -26,6 +25,7 @@ public class Store {
     private static final String DUPLICATE_MENU_MESSAGE = "똑같은 메뉴 정보가 이미 존재";
     private static final String NULL_MENU_MESSAGE = "메뉴정보는 NULL이면 안됨";
     private static final String INVALID_STATE_TO_ADD_RESERVATION = "가게가 닫힌 상태일 때만 예약 추가가 가능합니다.";
+    private static final String DEFAULT_FOREIGN_KEY = "store_id";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,18 +63,19 @@ public class Store {
     private LocalDateTime timeToClose;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = DEFAULT_FOREIGN_KEY)
     @Builder.Default
-    private List<Menu> menus = new ArrayList<>();
+    private Set<Menu> menus = new LinkedHashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @Where(clause = "activated = true")
+    @JoinColumn(name = DEFAULT_FOREIGN_KEY)
     @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
+    private Set<Reservation> reservations = new LinkedHashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @OrderBy("pickupTime")
+    @JoinColumn(name = DEFAULT_FOREIGN_KEY)
     @Builder.Default
-    private List<Order> orders = new ArrayList<>();
+    private Set<Order> orders = new LinkedHashSet<>();
 
     public boolean isOpen() {
         return updateOpenStatus();
@@ -108,7 +109,7 @@ public class Store {
         return this;
     }
 
-    public void addMenu(Menu menu) {
+    public Menu addMenu(Menu menu) {
         if (menu == null) {
             throw new IllegalArgumentException(NULL_MENU_MESSAGE);
         }
@@ -116,6 +117,7 @@ public class Store {
             throw new IllegalArgumentException(DUPLICATE_MENU_MESSAGE);
         }
         menus.add(menu);
+        return menu;
     }
 
     public void removeMenu(Menu removedMenu) {
@@ -181,7 +183,7 @@ public class Store {
                 .collect(Collectors.toList());
     }
 
-    class OrderRegister {
+    public class OrderRegister {
         private Order order;
 
         private OrderRegister(Customer customer, LocalDateTime pickupTime) {
@@ -217,7 +219,7 @@ public class Store {
         }
     }
 
-    class ReservationRegister {
+    public class ReservationRegister {
         private ReservationRegister() {
         }
 
