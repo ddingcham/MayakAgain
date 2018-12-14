@@ -50,7 +50,10 @@ public class ReservationRepositoryTest {
     public void list_current_reservations_있을때() {
         Reservation reservation = setUpActiveReservation();
         List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), LocalDate.now());
-        assertThat(actualReservations).isNotEmpty();
+        assertThat(actualReservations)
+                .isNotEmpty()
+                .contains(reservation)
+                .allMatch(Reservation::isActivated);
     }
 
     @Test
@@ -62,6 +65,7 @@ public class ReservationRepositoryTest {
     private Reservation setUpActiveReservation() {
         defaultStore.addReservation(LocalDateTime.now().plusDays(1L), LocalDate.now())
                 .with(defaultMenu, defaultMaxCount());
+        storeRepository.save(defaultStore);
         return defaultStore.getActiveReservations().get(0);
     }
 
