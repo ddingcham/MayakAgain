@@ -12,8 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,10 +70,8 @@ public class ReservationRepositoryTest {
 
     @Test
     public void list_last_reservations_하루전() {
-        int expected = 3;
-        long termOfPastDays = 1;
-//        setUp_last_case(expected, termOfPastDays);
-
+        long termOfPastDays = 1L;
+        setUpLastUsedReservation(termOfPastDays);
 
         LocalDate lastDate = reservationRepository
                 .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
@@ -87,14 +83,12 @@ public class ReservationRepositoryTest {
         List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
-        assertThat(actualReservations.size()).isEqualTo(expected);
     }
 
     @Test
     public void list_last_reservations_여러날전() {
-        int expected = 5;
-        long termOfPastDays = 10;
-//        setUp_last_case(expected, termOfPastDays);
+        long termOfPastDays = 10L;
+        setUpLastUsedReservation(termOfPastDays);
 
         LocalDate lastDate = reservationRepository
                 .findFirstByStoreIdAndOpenDateBeforeOrderByOpenDateDesc(defaultStore.getId(), LocalDate.now())
@@ -106,14 +100,16 @@ public class ReservationRepositoryTest {
         List<Reservation> actualReservations = reservationRepository.findAllByStoreIdAndOpenDate(defaultStore.getId(), lastDate);
 
         assertThat(actualReservations).isNotEmpty();
-        assertThat(actualReservations.size()).isEqualTo(expected);
     }
 
-    private void setUp_last_case(int expected, long termOfPastDays) {
-        for (int i = 0; i < expected; i++) {
-            targetReservations.add(generateTestReservation(LocalDate.now().minusDays(termOfPastDays)));
-        }
-        reservationRepository.saveAll(targetReservations);
+    private Reservation setUpLastUsedReservation(long termOfPastDays) {
+        LocalDateTime baseTime = LocalDateTime.now().minusDays(termOfPastDays);
+        defaultStore.addReservation(baseTime, baseTime.toLocalDate().minusDays(1L))
+                .with(defaultMenu, defaultMaxCount());
+        storeRepository.save(defaultStore);
+        Reservation lastUsedReservation = defaultStore.getActiveReservations().get(0);
+        setUpActiveReservation();
+        return lastUsedReservation;
     }
 
     private void prepareDefaultStore() {
@@ -137,8 +133,9 @@ public class ReservationRepositoryTest {
     }
 
     private void preparePastReservationsByStore() {
+        LocalDateTime baseTime;
         for(long year=1L;year<5L;year++){
-            LocalDateTime baseTime = LocalDateTime.MIN.plusYears(year);
+            baseTime = LocalDateTime.MIN.plusYears(year);
             defaultStore.addReservation(baseTime.plusDays(1L), baseTime.toLocalDate())
                     .with(defaultMenu, defaultMaxCount());
             storeRepository.save(defaultStore);
