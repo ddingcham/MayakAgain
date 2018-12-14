@@ -63,19 +63,19 @@ public class Store {
     private LocalDateTime timeToClose;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = DEFAULT_FOREIGN_KEY)
+    @JoinColumn(name = DEFAULT_FOREIGN_KEY, nullable = false)
     @Builder.Default
-    private Set<Menu> menus = new LinkedHashSet<>();
+    private List<Menu> menus = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = DEFAULT_FOREIGN_KEY, nullable = false)
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = DEFAULT_FOREIGN_KEY)
     @Builder.Default
-    private Set<Reservation> reservations = new LinkedHashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = DEFAULT_FOREIGN_KEY)
-    @Builder.Default
-    private Set<Order> orders = new LinkedHashSet<>();
+    private List<Order> orders = new ArrayList<>();
 
     public boolean isOpen() {
         return updateOpenStatus();
@@ -131,13 +131,14 @@ public class Store {
                 .isPresent();
     }
 
-    private Optional<Menu> searchMenuNotDeleted(Menu removedMenu) {
+    private Optional<Menu> searchMenuNotDeleted(Menu notDeletedMenu) {
         return menus.stream()
-                .filter(storedMenu -> storedMenu.isSameMenu(removedMenu) && !storedMenu.isDeleted())
+                .filter(storedMenu -> storedMenu.isSameMenu(notDeletedMenu))
+                .filter(storedMenu -> !storedMenu.isDeleted())
                 .findAny();
     }
 
-    public ReservationRegister addReservation(LocalDateTime timeToClose) {
+    public ReservationRegister addReservation(LocalDateTime timeToClose, LocalDate openDate) {
         if (isOpen() == OPEN) {
             throw new IllegalStateException(INVALID_STATE_TO_ADD_RESERVATION);
         }
@@ -145,7 +146,7 @@ public class Store {
                 .filter(Menu::isLastUsed)
                 .forEach(Menu::dropLastUsedStatus);
         setTimeToClose(timeToClose);
-        return new ReservationRegister();
+        return new ReservationRegister(openDate);
     }
 
     public List<Reservation> getActiveReservations() {
@@ -220,12 +221,14 @@ public class Store {
     }
 
     public class ReservationRegister {
-        private ReservationRegister() {
+        private LocalDate openDate;
+        private ReservationRegister(LocalDate openDate) {
+            this.openDate = openDate;
         }
 
         public ReservationRegister with(Menu menuForReservation, MaxCount maxCount) {
             reservations.add(Reservation.builder()
-                    .openDate(LocalDate.now())
+                    .openDate(openDate)
                     .activated(Reservation.RESERVATION_ACTIVATED)
                     .maxCount(maxCount)
                     .menu(searchMenuNotDeleted(menuForReservation)

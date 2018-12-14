@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface StoreRepository extends CrudRepository<Store, Long>{
     Optional<Store> findByUserId(long userId);
     Optional<Store> findByUser(User user);
-    @Query("select store from Store store join fetch store.reservations reservation where reservation.activated = 'true'")
+    @Query("select distinct store from Store store join fetch store.reservations reservation where reservation.activated = 'true'")
     Store findByIdWithActiveReservation(long id);
 }

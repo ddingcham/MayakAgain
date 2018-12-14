@@ -21,6 +21,9 @@ public class FixtureUtils {
     public static Menu unDeletedMenu() {
         return Menu.builder()
                 .name("unDeletedMenu")
+                .description("unDeletedMenu")
+                .price(1)
+                .imageUrl("/path")
                 .build();
     }
 
@@ -36,6 +39,7 @@ public class FixtureUtils {
         return Menu.builder()
                 .name("notLastUsedMenu")
                 .deleted(Menu.MENU_UN_DELETED)
+                .lastUsed(Menu.MENU_NOT_LAST_USED)
                 .build();
     }
 

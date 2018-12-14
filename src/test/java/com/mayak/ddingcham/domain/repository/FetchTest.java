@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.mayak.ddingcham.domain.FixtureUtils.unDeletedMenu;
@@ -37,7 +38,7 @@ public class FetchTest {
                 .storeName("")
                 .build();
         Menu menu = store.addMenu(unDeletedMenu());
-        store.addReservation(LocalDateTime.MAX)
+        store.addReservation(LocalDateTime.MAX, LocalDate.now())
                 .with(menu, new MaxCount(10,3));
         store.isOpen();
         storeRepository.save(store);
